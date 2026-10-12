@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.npm-cache/
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+.local/
+.playwright-mcp/
+next-env.d.ts
