@@ -95,7 +95,8 @@ This section is intentionally project-specific. Replace or remove it when copyin
 - This repository is a full-stack learning project for a URL shortener inspired by Bitly.
 - The agreed stack is Next.js App Router, TypeScript, Tailwind CSS, and Supabase Postgres.
 - The initial scope is anonymous URL creation, server-side validation, persistent storage, copying, and redirecting. Authentication, custom aliases, analytics, and public deployment are follow-up scope decisions.
-- Use Indonesian interface copy. Follow the clean, light, technical, and bold direction in `DESIGN.md` and the request flow in `docs/ARCHITECTURE.md`.
+- Support Indonesian (`/id`) and English (`/en`), with `/` redirecting to `/id`. Keep UI, metadata, accessibility labels, and error translations in `src/i18n/messages/` synchronized. Short links remain `/s/[code]` across languages.
+- Use Manrope for UI/body text, Lora for display headings, and system monospace for URLs. Follow `DESIGN.md` and the request flow in `docs/ARCHITECTURE.md`.
 - Keep UI components in `src/components/`, routes in `src/app/`, domain and data access in `src/lib/`, and SQL migrations in `supabase/migrations/`.
 - Access Supabase only from server code. Keep the secret key in `.env.local`, without a `NEXT_PUBLIC_` prefix. Enable RLS and do not expose a public table listing.
 - Never substitute mock link storage when Supabase is unavailable. Test fixtures must remain isolated from production code.

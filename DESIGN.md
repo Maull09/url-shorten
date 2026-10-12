@@ -22,7 +22,9 @@ Clean, light, technical, and bold. The characteristic visual is a long URL becom
 - Success ink/background: `#166534` / `#f0fdf4`.
 - Error ink/background: `#991b1b` / `#fef2f2`.
 
-Type: Arial for bold display headings; Segoe UI for interface/body text; Consolas for URLs. Use installed font families to keep setup independent of external font services. Body size starts at 16px with 1.5 line height. Display scales from 44px on mobile to 72px on desktop.
+Type: Manrope for interface/body text, controls, and the wordmark; Lora for hero and error-page display headings; system monospace (`ui-monospace`, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New) for URLs. Store the variable Manrope/Lora font files and OFL licenses locally and load them with `next/font/local`. Body size starts at 16px with 1.5 line height. Display scales from 36–44px on mobile to 72px on desktop, using 1.12 line height and -0.03em tracking for Lora.
+
+Font provenance: variable TrueType files from the official Google Fonts repository, [Manrope](https://github.com/google/fonts/tree/main/ofl/manrope) and [Lora](https://github.com/google/fonts/tree/main/ofl/lora). Original OFL license texts are retained beside each unmodified font in `src/assets/fonts/`.
 
 Layout: max-width 1120px; spacious header; two-column hero with the task form beside its explanation; single-column mobile layout; three sequential steps below. Use an 8px spacing rhythm, 12px panel radii, and 8px control radii. Left-align content.
 
@@ -35,6 +37,8 @@ Layout: max-width 1120px; spacious header; two-column hero with the task form be
 - Visible 3px focus outline, minimum 44px targets, sufficient text contrast, and no horizontal overflow at 320px.
 - Motion only for hover/focus feedback; respect reduced motion.
 - Recent links are limited to the current open page and explicitly labeled as such. They are not a public database listing.
+- Indonesian and English pages use `/id` and `/en`; `/` redirects to `/id`. A visible ID/EN selector uses native language names, keyboard-operable links, and an explicit current-language state. The locale controls the document language, metadata, interface, and errors. Navigating to another language starts a new page; current form input and page-session link history are not persisted across navigation.
+- Short links remain `/s/[code]` in both languages. Redirect error text follows the visitor's browser language, defaulting to Indonesian.
 
 ## Guidance provenance
 

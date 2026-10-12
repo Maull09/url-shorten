@@ -91,6 +91,50 @@ function openLink(code: string) {
   return GET(new Request(`http://localhost:3000/s/${code}`), { params: Promise.resolve({ code }) });
 }
 
+test("localizes API validation errors and response language without changing status codes", async () => {
+  const response = await POST(createRequest('{"url":"javascript:alert(1)"}', { "Accept-Language": "en-US,en;q=0.9" }));
+  assert.equal(response.status, 400);
+  assert.equal(response.headers.get("content-language"), "en");
+  assert.deepEqual(await response.json(), { error: "Use a complete URL starting with https:// or http://." });
+  assert.equal(inserts, 0);
+
+  const defaultResponse = await POST(createRequest("{}"));
+  assert.equal(defaultResponse.headers.get("content-language"), "id");
+  assert.deepEqual(await defaultResponse.json(), { error: "Masukkan URL yang ingin dipendekkan." });
+});
+
+test("localizes service errors without exposing database details", async () => {
+  failDatabase = true;
+  const response = await POST(createRequest('{"url":"https://example.com"}', { "Accept-Language": "en" }));
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("content-language"), "en");
+  assert.deepEqual(await response.json(), { error: "The link could not be created. The service is unavailable; please try again later." });
+});
+
+test("localizes request-boundary errors", async () => {
+  const cases: Array<{ body: string; headers: Record<string, string>; status: number; message: string }> = [
+    { body: "{}", headers: { Origin: "https://other.example.com" }, status: 403, message: "The request must come from this application." },
+    { body: "{}", headers: { "Content-Type": "text/plain" }, status: 415, message: "Send the request with Content-Type application/json." },
+    { body: "not-json", headers: {}, status: 400, message: "The request is not valid. Send the URL in JSON format." },
+  ];
+
+  for (const entry of cases) {
+    const response = await POST(createRequest(entry.body, { ...entry.headers, "Accept-Language": "en" }));
+    assert.equal(response.status, entry.status);
+    assert.equal(response.headers.get("content-language"), "en");
+    assert.deepEqual(await response.json(), { error: entry.message });
+  }
+  assert.equal(inserts, 0);
+});
+
+test("localizes missing short-link errors and points to the matching language homepage", async () => {
+  const response = await GET(new Request("http://localhost:3000/s/invalid!", { headers: { "Accept-Language": "en" } }), { params: Promise.resolve({ code: "invalid!" }) });
+  assert.equal(response.status, 404);
+  assert.equal(response.headers.get("content-language"), "en");
+  assert.equal(await response.text(), "Link not found. Check the address or ask the sender for a new link.\n\nCreate a link: /en");
+  assert.equal(lookups, 0);
+});
+
 test("stores a link and retrieves the destination via the REST client", async () => {
   const link = await createLink("https://example.com/article?source=test");
   assert.ok(SHORT_CODE_PATTERN.test(link.code));
@@ -156,13 +200,15 @@ test("respects the protocol of a trusted reverse proxy", async () => {
 });
 
 test("returns Retry-After once a client's creation limit is reached", async () => {
-  const headers = { "x-forwarded-for": "limited-test-client" };
+  const headers = { "x-forwarded-for": "limited-test-client", "Accept-Language": "en" };
   for (let index = 0; index < 10; index++) {
     assert.equal((await POST(createRequest('{"url":"https://example.com"}', headers))).status, 201);
   }
   const response = await POST(createRequest('{"url":"https://example.com"}', headers));
   assert.equal(response.status, 429);
   assert.ok(Number(response.headers.get("retry-after")) > 0);
+  assert.equal(response.headers.get("content-language"), "en");
+  assert.deepEqual(await response.json(), { error: `Too many attempts. Try again in ${response.headers.get("retry-after")} seconds.` });
   assert.equal(inserts, 10);
 });
 

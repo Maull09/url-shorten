@@ -4,6 +4,10 @@ URL shortener untuk belajar full-stack dengan Next.js App Router, TypeScript, Ta
 
 Fitur awal: membuat link pendek, menyimpan tujuan di database, menyalin link, menampilkan link yang dibuat selama halaman terbuka, dan redirect. Belum ada akun pengguna, custom alias, atau statistik kunjungan.
 
+Antarmuka tersedia dalam bahasa Indonesia (`/id`) dan Inggris (`/en`); `/` menuju `/id`. Gunakan pilihan ID/EN di header untuk berpindah bahasa. Terjemahan mencakup metadata, label aksesibilitas, form, clipboard, validasi, dan pesan API. Link pendek tetap memakai `/s/KODE` untuk kedua bahasa.
+
+Font: Manrope untuk UI, Lora untuk judul utama, dan monospace sistem untuk URL. File font dan lisensi OFL disimpan lokal sehingga build dan pengunjung tidak perlu meminta font ke layanan eksternal.
+
 ## Menjalankan proyek
 
 Gunakan Node.js 22 LTS atau lebih baru dan npm. Di PowerShell, gunakan `npm.cmd` jika eksekusi `npm.ps1` diblokir.
@@ -46,6 +50,8 @@ GET /s/KODE
 ```
 
 - `src/components/shortener-form.tsx`: state form, fetch, loading, error, dan clipboard.
+- `src/i18n/messages/id.json` dan `en.json`: kamus terjemahan dengan struktur yang sama; `src/i18n/config.ts` mengatur locale dan pilihan bahasa request.
+- `src/app/[locale]/`: layout dengan bahasa dokumen, metadata, dan halaman lokal; `src/assets/fonts.ts` memuat font.
 - `src/app/api/links/route.ts`: batas request dan respons HTTP.
 - `src/lib/url.ts`: aturan URL dan kode pendek.
 - `src/lib/links.ts`: penyimpanan dan penanganan collision kode.
@@ -70,6 +76,8 @@ Tes memakai server HTTP lokal terisolasi untuk menguji batas REST Supabase. Tes 
 ## Batas versi belajar
 
 Link tujuan dapat diakses siapa pun yang mengetahui kode pendeknya. Hindari URL rahasia atau yang mengandung token. Link pada halaman hanya mencakup sesi halaman saat ini; database tetap menyimpan link setelah halaman ditutup.
+
+Berpindah bahasa membuka halaman baru; input dan daftar link selama sesi halaman tidak dipertahankan. Pesan error pada `/s/KODE` mengikuti bahasa browser pengunjung, dengan bahasa Indonesia sebagai default.
 
 Rate limit pembuatan link berlaku per IP per proses dan reset saat server restart. Sebelum membuka layanan publik, gunakan proxy dengan IP terpercaya, pembatasan bersama antar-instance, dan kebijakan penanganan link berbahaya. Deployment publik belum termasuk versi ini.
 

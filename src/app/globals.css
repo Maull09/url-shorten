@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   --color-canvas: #f8fafc;
   --color-ink: #172554;
   --color-muted: #475569;
   --color-accent: #1d4ed8;
   --color-line: #cbd5e1;
   --color-control: #64748b;
-  --font-sans: "Segoe UI", Arial, sans-serif;
-  --font-display: Arial, "Segoe UI", sans-serif;
-  --font-mono: Consolas, "Courier New", monospace;
+  --font-sans: var(--font-manrope), sans-serif;
+  --font-display: var(--font-lora), serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 html { scroll-behavior: smooth; }

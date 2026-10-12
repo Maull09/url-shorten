@@ -1,0 +1,27 @@
+{
+  "metadata": { "title": "Pendek — URL Shortener", "description": "Turn long URLs into short links that are easy to copy and share." },
+  "navigation": { "skip": "Skip to content", "home": "Pendek, home", "how": "How it works", "language": "Language" },
+  "hero": { "firstLine": "Long links.", "secondLine": "Made short.", "description": "Turn long URLs into short links that are easy to copy, send, and share.", "illustration": "Illustration of a long URL becoming a short link", "before": "Before", "after": "After · illustration", "example": "example.com/article/learning-fullstack?ref=share" },
+  "form": { "heading": "Create a short link", "label": "Destination URL", "placeholder": "https://example.com/long-link", "help": "Use a complete address starting with https:// or http://.", "submit": "Shorten link", "pending": "Creating link…", "empty": "Your short link will appear here.", "recent": "Previous links", "recentHelp": "Created while this page is open." },
+  "result": { "ready": "Your short link is ready to share.", "destination": "Destination", "open": "Open link", "newTab": "in a new tab", "copy": "Copy link", "copied": "Copied", "copySuccess": "Link copied to the clipboard.", "copyFailure": "Could not copy. Select the link address and copy it manually." },
+  "how": { "heading": "From URL to short link.", "steps": [ { "title": "Paste a URL", "description": "Copy the address of the page you want to share." }, { "title": "Create a short link", "description": "We save the destination and create a unique code for your link." }, { "title": "Copy and share", "description": "Anyone who opens the link will be redirected to the destination page." } ] },
+  "footer": { "tagline": "Shorter links, easier sharing.", "privacy": "Only share URLs that may be accessed publicly." },
+  "notFound": { "title": "Page not found.", "description": "Check the address you opened or create a new short link.", "home": "Back to home" },
+  "redirect": { "notFound": "Link not found. Check the address or ask the sender for a new link.", "unavailable": "This link cannot be opened right now. The service is unavailable; please try again later.", "create": "Create a link" },
+  "errors": {
+    "required": "Enter the URL you want to shorten.",
+    "tooLong": "URLs must be at most 2,048 characters long.",
+    "protocol": "Use a complete URL starting with https:// or http://.",
+    "invalidUrl": "This URL is not valid. Check the address and try again.",
+    "credentials": "Use a URL without a username or password in the address.",
+    "shortLink": "Enter the original destination URL, rather than a short link from this app.",
+    "normalizedTooLong": "The normalized URL exceeds 2,048 characters.",
+    "bodyTooLarge": "The request is too large. URLs must be at most 2,048 characters long.",
+    "invalidJson": "The request is not valid. Send the URL in JSON format.",
+    "origin": "The request must come from this application.",
+    "contentType": "Send the request with Content-Type application/json.",
+    "rateLimit": "Too many attempts. Try again in {seconds} seconds.",
+    "unavailable": "The link could not be created. The service is unavailable; please try again later.",
+    "connection": "The connection was interrupted. Check your connection and try again."
+  }
+}

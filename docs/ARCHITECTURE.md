@@ -21,6 +21,9 @@ Destinations are public to anyone with their short code. Do not shorten confiden
 ## Structure
 
 - `src/app/`: pages, metadata, global styles, API and redirect routes.
+- `src/app/[locale]/`: localized root layout, homepage, and 404 content for `/id` and `/en`.
+- `src/i18n/messages/`: matching Indonesian/English dictionaries; `src/i18n/config.ts` defines supported languages and request-language selection.
+- `src/assets/fonts/`: locally served Manrope and Lora variable font files and their OFL licenses.
 - `src/components/`: interactive form and small shared presentation components.
 - `src/lib/`: URL rules, code generation, data access, rate limiting, and server configuration.
 - `tests/`: validation, collision, API and redirect behavior using an isolated local HTTP fixture for the Supabase REST boundary.
@@ -31,3 +34,9 @@ Destinations are public to anyone with their short code. Do not shorten confiden
 This is a local learning MVP. Creation is limited per IP per server process. The proxy must supply a trusted client IP; untrusted forwarded headers can be spoofed. The limiter resets on restart and is not shared across instances. A public deployment needs trusted proxy configuration, a shared rate limiter, and a policy for abusive destinations. The app does not collect visit analytics or IP addresses in its database.
 
 Supabase setup is documented in `README.md`. Production builds do not require Supabase credentials; actual create/redirect requests do.
+
+## Internationalization
+
+`/` redirects to `/id` through Next.js redirect configuration. Localized pages validate their locale and generate translated metadata. The locale layout sets `<html lang>` and loads the shared local fonts. A global 404 is required because the root layout is under a dynamic locale segment; it uses Next's documented `globalNotFound` option and offers both language homepages. Unknown localized subpaths render a 404 in that locale.
+
+Translations are typed against the Indonesian dictionary, without a new i18n dependency. The form passes its locale in `Accept-Language`; API messages and redirect errors select a supported language from that header. Validation throws stable error codes, translated at the UI/API boundary. Codes and stored destinations are shared across languages. Short URLs and the database schema are unchanged.

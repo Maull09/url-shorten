@@ -5,7 +5,7 @@ const MAX_BODY_BYTES = 8192;
 export async function readJson(request: Request): Promise<unknown> {
   const reader = request.body?.getReader();
 
-  if (!reader) throw new InputError("Masukkan URL yang ingin dipendekkan.");
+  if (!reader) throw new InputError("required");
 
   const chunks: Uint8Array[] = [];
   let bytes = 0;
@@ -19,7 +19,7 @@ export async function readJson(request: Request): Promise<unknown> {
 
       if (bytes > MAX_BODY_BYTES) {
         await reader.cancel();
-        throw new InputError("Data terlalu besar. URL maksimal 2.048 karakter.");
+        throw new InputError("bodyTooLarge");
       }
 
       chunks.push(value);
@@ -33,6 +33,6 @@ export async function readJson(request: Request): Promise<unknown> {
   try {
     return JSON.parse(body);
   } catch {
-    throw new InputError("Data belum valid. Kirim URL dalam format JSON.");
+    throw new InputError("invalidJson");
   }
 }

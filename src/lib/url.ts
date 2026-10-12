@@ -5,17 +5,17 @@ export const SHORT_CODE_PATTERN = /^[A-Za-z0-9]{8}$/;
 
 export function validateTargetUrl(input: unknown, origin: string): string {
   if (typeof input !== "string" || !input.trim()) {
-    throw new InputError("Masukkan URL yang ingin dipendekkan.");
+    throw new InputError("required");
   }
 
   const value = input.trim();
 
   if (value.length > MAX_URL_LENGTH) {
-    throw new InputError("URL maksimal 2.048 karakter.");
+    throw new InputError("tooLong");
   }
 
   if (!/^https?:\/\//i.test(value)) {
-    throw new InputError("Gunakan URL lengkap yang diawali https:// atau http://.");
+    throw new InputError("protocol");
   }
 
   let url: URL;
@@ -23,19 +23,19 @@ export function validateTargetUrl(input: unknown, origin: string): string {
   try {
     url = new URL(value);
   } catch {
-    throw new InputError("URL belum valid. Periksa alamatnya lalu coba lagi.");
+    throw new InputError("invalidUrl");
   }
 
   if (!url.hostname || url.username || url.password) {
-    throw new InputError("Gunakan URL tanpa username atau password di alamatnya.");
+    throw new InputError("credentials");
   }
 
   if (url.origin === origin && url.pathname.startsWith("/s/")) {
-    throw new InputError("Masukkan URL tujuan asli, bukan link pendek dari aplikasi ini.");
+    throw new InputError("shortLink");
   }
 
   if (url.href.length > MAX_URL_LENGTH) {
-    throw new InputError("URL setelah normalisasi melebihi 2.048 karakter.");
+    throw new InputError("normalizedTooLong");
   }
 
   return url.href;

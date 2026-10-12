@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: { globalNotFound: true },
   turbopack: { root: process.cwd() },
+  async redirects() {
+    return [{ source: "/", destination: "/id", permanent: false }];
+  },
   async headers() {
     return [{
       source: "/:path*",

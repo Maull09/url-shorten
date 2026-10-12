@@ -1,0 +1,27 @@
+{
+  "metadata": { "title": "Pendek — Pemendek URL", "description": "Ubah URL panjang menjadi link singkat yang mudah disalin dan dibagikan." },
+  "navigation": { "skip": "Lewati ke konten", "home": "Pendek, beranda", "how": "Cara kerja", "language": "Bahasa" },
+  "hero": { "firstLine": "Link panjang.", "secondLine": "Jadi singkat.", "description": "Ubah URL panjang menjadi link ringkas yang mudah disalin, dikirim, dan dibagikan.", "illustration": "Ilustrasi URL panjang menjadi link pendek", "before": "Sebelum", "after": "Sesudah · ilustrasi", "example": "contoh.com/artikel/belajar-fullstack?ref=bagikan" },
+  "form": { "heading": "Buat link pendek", "label": "URL tujuan", "placeholder": "https://contoh.com/link-panjang", "help": "Gunakan alamat lengkap dengan https:// atau http://.", "submit": "Pendekkan link", "pending": "Membuat link…", "empty": "Link pendekmu akan muncul di sini.", "recent": "Link sebelumnya", "recentHelp": "Dibuat selama halaman ini terbuka." },
+  "result": { "ready": "Link pendek siap dibagikan.", "destination": "Tujuan", "open": "Buka link", "newTab": "di tab baru", "copy": "Salin link", "copied": "Tersalin", "copySuccess": "Link disalin ke clipboard.", "copyFailure": "Belum bisa menyalin. Pilih alamat link lalu salin secara manual." },
+  "how": { "heading": "Dari URL ke link pendek.", "steps": [ { "title": "Tempel URL", "description": "Salin alamat halaman yang ingin kamu bagikan." }, { "title": "Buat link pendek", "description": "Kami menyimpan tujuan dan membuat kode unik untuk linkmu." }, { "title": "Salin dan bagikan", "description": "Siapa pun yang membuka link akan diarahkan ke halaman tujuan." } ] },
+  "footer": { "tagline": "Lebih ringkas, lebih mudah dibagikan.", "privacy": "Bagikan hanya URL yang boleh diakses publik." },
+  "notFound": { "title": "Halaman tidak ditemukan.", "description": "Periksa alamat yang kamu buka atau buat link pendek baru.", "home": "Kembali ke beranda" },
+  "redirect": { "notFound": "Link tidak ditemukan. Periksa alamatnya atau minta link baru kepada pengirim.", "unavailable": "Link belum bisa dibuka. Layanan sedang tidak tersedia; coba lagi nanti.", "create": "Buat link" },
+  "errors": {
+    "required": "Masukkan URL yang ingin dipendekkan.",
+    "tooLong": "URL maksimal 2.048 karakter.",
+    "protocol": "Gunakan URL lengkap yang diawali https:// atau http://.",
+    "invalidUrl": "URL belum valid. Periksa alamatnya lalu coba lagi.",
+    "credentials": "Gunakan URL tanpa username atau password di alamatnya.",
+    "shortLink": "Masukkan URL tujuan asli, bukan link pendek dari aplikasi ini.",
+    "normalizedTooLong": "URL setelah normalisasi melebihi 2.048 karakter.",
+    "bodyTooLarge": "Data terlalu besar. URL maksimal 2.048 karakter.",
+    "invalidJson": "Data belum valid. Kirim URL dalam format JSON.",
+    "origin": "Permintaan harus berasal dari aplikasi ini.",
+    "contentType": "Kirim data dengan Content-Type application/json.",
+    "rateLimit": "Terlalu banyak percobaan. Coba lagi dalam {seconds} detik.",
+    "unavailable": "Link belum bisa dibuat. Layanan sedang tidak tersedia; coba lagi nanti.",
+    "connection": "Koneksi terputus. Periksa koneksi lalu coba lagi."
+  }
+}
