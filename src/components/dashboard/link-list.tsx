@@ -12,8 +12,8 @@ export function DashboardLinkList({ links, total, page, origin, locale, messages
   const dates = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Asia/Jakarta" });
   return (
     <section className="min-w-0" aria-labelledby="links-heading">
-      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-5">
-        <h2 id="links-heading" className="text-xl font-semibold tracking-tight">{messages.dashboard.listTitle}</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
+        <h2 id="links-heading" className="text-base font-semibold">{messages.dashboard.listTitle}</h2>
         <p className="text-sm text-muted">{messages.dashboard.count}: <span className="font-semibold text-ink">{numbers.format(total)}</span></p>
       </div>
       {!links.length && <p className="py-8 leading-relaxed text-muted">{messages.dashboard.empty}</p>}
@@ -21,11 +21,13 @@ export function DashboardLinkList({ links, total, page, origin, locale, messages
         {links.map((link) => {
           const shortUrl = `${origin}/s/${link.code}`;
           return (
-            <li key={link.code} className="py-6">
-              <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="break-all font-mono text-lg font-semibold text-accent underline underline-offset-4">/s/{link.code}<span className="sr-only"> {messages.result.newTab}</span></a>
-              <p className="mt-3 break-all text-sm text-muted">{link.targetUrl}</p>
-              <p className="mt-2 text-xs text-muted">{messages.dashboard.created}: <time dateTime={link.createdAt}>{dates.format(new Date(link.createdAt))}</time></p>
-              <div className="mt-4 flex flex-wrap items-start gap-3"><CopyButton url={shortUrl} messages={messages.result} /><DeleteLinkButton code={link.code} locale={locale} messages={messages} /></div>
+            <li key={link.code} className="grid items-center gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-6">
+              <div className="min-w-0">
+                <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center break-all font-mono text-sm font-semibold text-accent underline underline-offset-4">/s/{link.code}<span className="sr-only"> {messages.result.newTab}</span></a>
+                <p className="break-all text-sm text-muted">{link.targetUrl}</p>
+                <p className="mt-1 text-xs text-muted">{messages.dashboard.created}: <time dateTime={link.createdAt}>{dates.format(new Date(link.createdAt))}</time></p>
+              </div>
+              <div className="flex flex-wrap items-start gap-2"><CopyButton url={shortUrl} messages={messages.result} /><DeleteLinkButton code={link.code} locale={locale} messages={messages} /></div>
             </li>
           );
         })}

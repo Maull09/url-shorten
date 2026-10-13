@@ -1,5 +1,6 @@
 {
   "metadata": { "title": "Pendek — Pemendek URL", "description": "Ubah URL panjang menjadi link singkat yang mudah disalin dan dibagikan." },
+  "workspace": { "title": "Link pendek", "sessionTitle": "Link sesi ini", "sessionHelp": "Maksimal enam link selama halaman ini terbuka. Berpindah halaman mengosongkan daftar ini." },
   "navigation": { "skip": "Lewati ke konten", "home": "Pendek, beranda", "how": "Cara kerja", "language": "Bahasa" },
   "hero": { "firstLine": "Link panjang.", "secondLine": "Jadi singkat.", "description": "Ubah URL panjang menjadi link ringkas yang mudah disalin, dikirim, dan dibagikan.", "illustration": "Ilustrasi URL panjang menjadi link pendek", "before": "Sebelum", "after": "Sesudah · ilustrasi", "example": "contoh.com/artikel/belajar-fullstack?ref=bagikan" },
   "form": { "heading": "Buat link pendek", "label": "URL tujuan", "placeholder": "https://contoh.com/link-panjang", "help": "Gunakan alamat lengkap dengan https:// atau http://.", "submit": "Pendekkan link", "pending": "Membuat link…", "empty": "Link pendekmu akan muncul di sini.", "recent": "Link sebelumnya", "recentHelp": "Dibuat selama halaman ini terbuka." },

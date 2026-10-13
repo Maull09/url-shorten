@@ -24,6 +24,8 @@ Destinations are public to anyone with their short code. Do not shorten confiden
 
 ## Structure
 
+Public and authenticated workspaces share a simple one-column layout: compact header, page heading, creation form, and link list. The public page lists only up to six links made while it is open; the private dashboard lists server-stored owned links with pagination. There is no promotional hero or how-it-works section. On desktop, creation fields sit in a row and link actions align with each entry; mobile stacks both.
+
 - `src/app/`: pages, metadata, global styles, API and redirect routes.
 - `src/app/[locale]/`: localized root layout, homepage, and 404 content for `/id` and `/en`.
 - `src/i18n/messages/`: matching Indonesian/English dictionaries; `src/i18n/config.ts` defines supported languages and request-language selection.

@@ -1,5 +1,6 @@
 {
   "metadata": { "title": "Pendek — URL Shortener", "description": "Turn long URLs into short links that are easy to copy and share." },
+  "workspace": { "title": "Short links", "sessionTitle": "Links in this session", "sessionHelp": "Up to six links created while this page is open. Switching pages clears this list." },
   "navigation": { "skip": "Skip to content", "home": "Pendek, home", "how": "How it works", "language": "Language" },
   "hero": { "firstLine": "Long links.", "secondLine": "Made short.", "description": "Turn long URLs into short links that are easy to copy, send, and share.", "illustration": "Illustration of a long URL becoming a short link", "before": "Before", "after": "After · illustration", "example": "example.com/article/learning-fullstack?ref=share" },
   "form": { "heading": "Create a short link", "label": "Destination URL", "placeholder": "https://example.com/long-link", "help": "Use a complete address starting with https:// or http://.", "submit": "Shorten link", "pending": "Creating link…", "empty": "Your short link will appear here.", "recent": "Previous links", "recentHelp": "Created while this page is open." },

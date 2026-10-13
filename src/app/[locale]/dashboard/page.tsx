@@ -21,7 +21,24 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 function Unavailable({ locale }: { locale: Locale }) {
   const messages = getMessages(locale);
-  return <main className="mx-auto max-w-xl px-6 py-16"><h1 className="font-display text-3xl font-bold">{messages.dashboard.title}</h1><p role="alert" className="mt-5 text-muted">{messages.dashboard.unavailable}</p><a href={`/${locale}/dashboard`} className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-accent px-5 font-semibold text-white">{messages.dashboard.retry}</a><Link href={`/${locale}`} className="ml-4 inline-flex min-h-11 items-center text-accent underline">{messages.auth.home}</Link></main>;
+  return (
+    <div className="mx-auto max-w-5xl px-5 sm:px-8">
+      <header className="flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-line py-3">
+        <BrandLink locale={locale} label={messages.navigation.home} />
+        <LanguageSwitcher locale={locale} label={messages.navigation.language} page="dashboard" />
+      </header>
+      <main className="py-8 sm:py-10">
+        <h1 className="font-display text-3xl font-bold tracking-tight">{messages.dashboard.title}</h1>
+        <div className="mt-6 rounded-xl border border-line bg-white p-5 sm:p-6">
+          <p role="alert" className="text-sm text-muted">{messages.dashboard.unavailable}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <a href={`/${locale}/dashboard`} className="inline-flex min-h-11 items-center rounded-lg bg-accent px-5 text-sm font-semibold text-white">{messages.dashboard.retry}</a>
+            <Link href={`/${locale}`} className="inline-flex min-h-11 items-center text-sm text-accent underline">{messages.auth.home}</Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default async function DashboardPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ page?: string }> }) {
@@ -38,18 +55,18 @@ export default async function DashboardPage({ params, searchParams }: { params: 
   const pages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
   if (page > pages) redirect(`/${locale}/dashboard?page=${pages}`);
   return (
-    <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <div className="mx-auto max-w-5xl px-5 sm:px-8">
       <a href="#dashboard-content" className="sr-only z-10 rounded-lg bg-white p-3 focus:not-sr-only focus:absolute focus:top-3">{messages.navigation.skip}</a>
-      <header className="flex min-h-24 flex-wrap items-center justify-between gap-4 border-b border-line py-5">
+      <header className="flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-line py-3">
         <BrandLink locale={locale} label={messages.navigation.home} />
         <LanguageSwitcher locale={locale} label={messages.navigation.language} page="dashboard" />
       </header>
-      <main id="dashboard-content" className="py-10 sm:py-14">
-        <div className="mb-10 flex flex-wrap items-start justify-between gap-6">
-          <div><h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">{messages.dashboard.title}</h1><p className="mt-4 max-w-lg leading-relaxed text-muted">{messages.dashboard.description}</p></div>
-          <div className="min-w-0 max-w-full"><p className="mb-3 break-all text-sm text-muted">{messages.dashboard.account}: {auth.user.email}</p><LogoutButton locale={locale} messages={messages} /></div>
+      <main id="dashboard-content" className="py-8 sm:py-10">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0"><h1 className="font-display text-3xl font-bold tracking-tight">{messages.dashboard.title}</h1><p className="mt-2 break-all text-sm text-muted">{messages.dashboard.account}: {auth.user.email}</p></div>
+          <LogoutButton locale={locale} messages={messages} />
         </div>
-        <div className="grid items-start gap-10 lg:grid-cols-[380px_minmax(0,1fr)]">
+        <div className="space-y-8">
           <DashboardLinkCreator locale={locale} messages={messages} />
           <DashboardLinkList {...data} origin={getAppOrigin()} locale={locale} messages={messages} />
         </div>
