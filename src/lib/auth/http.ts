@@ -39,7 +39,11 @@ export function limitMutation(request: Request, action: string, locale: Locale) 
 export function authFailure(error: unknown, locale: Locale) {
   const messages = getMessages(locale);
   if (error instanceof AuthRequiredError) return privateJson({ error: messages.errors.authRequired }, 401, locale);
-  if (error instanceof InputError) return privateJson({ error: messages.errors[error.code] }, error.code === "origin" ? 403 : error.code === "contentType" ? 415 : 400, locale);
+  if (error instanceof InputError) {
+    const field = error.code === "aliasInvalid" || error.code === "aliasTaken" ? "alias" : undefined;
+    const status = error.code === "aliasTaken" ? 409 : error.code === "origin" ? 403 : error.code === "contentType" ? 415 : 400;
+    return privateJson({ error: messages.errors[error.code], ...(field ? { field } : {}) }, status, locale);
+  }
   return privateJson({ error: messages.errors.authUnavailable }, 503, locale);
 }
 

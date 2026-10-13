@@ -2,7 +2,7 @@
 
 URL shortener untuk belajar full-stack dengan Next.js App Router, TypeScript, Tailwind CSS, Supabase Postgres, dan Supabase Auth.
 
-Fitur: pemendekan link anonim, akun email/password dengan konfirmasi email, login/logout, dashboard pribadi, pembuatan dan penghapusan link milik pengguna, pagination, salin link, dan redirect publik. Custom alias, pemulihan password, dan statistik kunjungan belum termasuk.
+Fitur: pemendekan link anonim, kode otomatis atau alias custom, akun email/password dengan konfirmasi email, login/logout, dashboard pribadi, pembuatan dan penghapusan link milik pengguna, pagination, salin link, dan redirect publik. Pemulihan password dan statistik kunjungan belum termasuk.
 
 Antarmuka tersedia dalam bahasa Indonesia (`/id`) dan Inggris (`/en`); `/` menuju `/id`. Gunakan pilihan ID/EN di header untuk berpindah bahasa. Terjemahan mencakup metadata, label aksesibilitas, form, clipboard, validasi, dan pesan API. Link pendek tetap memakai `/s/KODE` untuk kedua bahasa.
 
@@ -18,7 +18,7 @@ Copy-Item .env.example .env.local
 ```
 
 1. Buat atau buka proyek di [Supabase Dashboard](https://supabase.com/dashboard).
-2. Buka SQL Editor dan jalankan migrasi secara berurutan: `supabase/migrations/202610130001_create_links.sql`, lalu `supabase/migrations/202610130002_add_link_ownership.sql`. Jika migrasi pertama sudah dijalankan untuk MVP sebelumnya, jalankan **hanya migrasi kedua**. Migrasi kedua mempertahankan link lama dengan owner null dan menambahkan policy akses per pengguna.
+2. Buka SQL Editor dan jalankan migrasi yang belum diterapkan secara berurutan: `supabase/migrations/202610130001_create_links.sql`, `supabase/migrations/202610130002_add_link_ownership.sql`, lalu `supabase/migrations/202610130003_add_custom_aliases.sql`. Jika dua migrasi sebelumnya sudah dijalankan, jalankan **hanya migrasi ketiga**. Migrasi kedua mempertahankan link lama dengan owner null dan menambahkan policy akses per pengguna. Migrasi ketiga memperluas aturan kode untuk alias custom tanpa mengubah link lama.
 3. Ambil Project URL, secret key (`sb_secret_...`), dan publishable key (`sb_publishable_...`) dari pengaturan API Keys. Panduan resmi: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys). Jangan mengisi publishable key dengan secret key.
 4. Isi `.env.local` secara lokal:
 
@@ -45,10 +45,14 @@ Konfirmasi email harus dibuka pada browser yang dipakai mendaftar karena kode PK
 
 ## Alur untuk dipelajari
 
+Di beranda maupun dashboard, isi kolom alias opsional untuk memilih alamat seperti `/s/belajar-next`. Alias memakai 3–32 huruf ASCII, angka, `-`, atau `_`; spasi di awal/akhir dihapus, dan huruf besar/kecil dibedakan. Kosongkan kolom untuk kode otomatis delapan karakter. Alias bersifat unik di seluruh aplikasi, termasuk link anonim dan link akun lain. Konflik mengembalikan HTTP 409 tanpa menimpa link lama atau mengganti alias dengan kode acak. Form mempertahankan input saat gagal dan mengosongkan alias setelah berhasil.
+
+`POST /api/links` dan `POST /api/dashboard/links` menerima JSON `{ "url": "https://example.com", "alias": "belajar-next" }`; `alias` boleh dihilangkan atau berupa string kosong untuk mode otomatis. Alias yang tidak valid menghasilkan HTTP 400, dengan `field: "alias"` agar form menandai kolom yang benar. Alias custom disimpan lewat satu INSERT; primary key database mencegah konflik ketika permintaan datang bersamaan. Collision kode otomatis tetap dicoba ulang hingga tiga kali.
+
 ```text
 Form React
   → POST /api/links
-  → validasi dan kode acak
+  → validasi alias custom atau kode acak
   → INSERT ke Supabase
   → tampilkan dan salin /s/KODE
 
@@ -99,4 +103,4 @@ Rate limit pembuatan link berlaku per IP per proses dan reset saat server restar
 
 Audit pada setup awal 13 Oktober 2026: dependency produksi tidak memiliki temuan; audit lengkap memiliki lima temuan high pada rantai `eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch → braces` (advisory `GHSA-vfj7-8cjw-p6xm`). Temuan ini berada pada tooling development. Belum ada perbaikan otomatis; rekomendasi npm berupa downgrade major tidak diterapkan.
 
-Latihan berikutnya: pemulihan password, custom alias beserta tes konflik, dan masa berlaku link.
+Latihan berikutnya: pemulihan password dan masa berlaku link.

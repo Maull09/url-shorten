@@ -5,7 +5,7 @@ import { createLink } from "@/lib/links";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { readJson } from "@/lib/request-json";
 import { getRequestOrigin } from "@/lib/request-origin";
-import { validateTargetUrl } from "@/lib/url";
+import { validateCustomAlias, validateTargetUrl } from "@/lib/url";
 
 export const runtime = "nodejs";
 
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     }
 
     const targetUrl = validateTargetUrl(body.url, origin);
+    const alias = validateCustomAlias("alias" in body ? body.alias : undefined);
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
     const retryAfter = checkRateLimit(clientIp);
 
@@ -50,10 +51,11 @@ export async function POST(request: Request) {
       );
     }
 
-    return json(await createLink(targetUrl), 201, locale);
+    return json(await createLink(targetUrl, alias), 201, locale);
   } catch (error) {
     if (error instanceof InputError) {
-      return json({ error: messages.errors[error.code] }, 400, locale);
+      const field = error.code === "aliasInvalid" || error.code === "aliasTaken" ? "alias" : undefined;
+      return json({ error: messages.errors[error.code], ...(field ? { field } : {}) }, error.code === "aliasTaken" ? 409 : 400, locale);
     }
 
     return json({ error: messages.errors.unavailable }, 503, locale);

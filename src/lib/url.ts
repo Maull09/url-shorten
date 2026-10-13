@@ -1,7 +1,17 @@
 import { InputError } from "./errors";
 
 export const MAX_URL_LENGTH = 2048;
-export const SHORT_CODE_PATTERN = /^[A-Za-z0-9]{8}$/;
+export const MAX_ALIAS_LENGTH = 32;
+export const SHORT_CODE_PATTERN = /^[A-Za-z0-9_-]{3,32}$/;
+
+export function validateCustomAlias(input: unknown): string | undefined {
+  if (input === undefined) return undefined;
+  if (typeof input !== "string") throw new InputError("aliasInvalid");
+  const alias = input.trim();
+  if (!alias) return undefined;
+  if (!SHORT_CODE_PATTERN.test(alias)) throw new InputError("aliasInvalid");
+  return alias;
+}
 
 export function validateTargetUrl(input: unknown, origin: string): string {
   if (typeof input !== "string" || !input.trim()) {

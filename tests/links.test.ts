@@ -37,7 +37,7 @@ const database = createServer(async (request, response) => {
     inserts++;
     const body = await parseBody(request);
 
-    if (collisionCount-- > 0) {
+    if (collisionCount-- > 0 || rows.has(body.code)) {
       response.writeHead(409).end(JSON.stringify({ code: "23505", message: "duplicate key" }));
       return;
     }
@@ -166,6 +166,50 @@ test("creates a link through POST and redirects with an uncached 302", async () 
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "https://example.com/article?q=1#intro");
   assert.equal(redirect.headers.get("cache-control"), "no-store");
+});
+
+test("creates and redirects a case-sensitive custom alias with hyphens and underscores", async () => {
+  const response = await POST(createRequest(JSON.stringify({ url: "https://example.com/custom", alias: "  Learn-next_123  " })));
+  assert.equal(response.status, 201);
+  assert.equal((await response.json()).code, "Learn-next_123");
+  assert.equal((await openLink("Learn-next_123")).headers.get("location"), "https://example.com/custom");
+  assert.equal((await openLink("learn-next_123")).status, 404);
+});
+
+test("blank aliases still create eight-character automatic codes", async () => {
+  for (const alias of ["", "   "]) {
+    const response = await POST(createRequest(JSON.stringify({ url: "https://example.com/", alias })));
+    assert.equal(response.status, 201);
+    assert.match((await response.json()).code, /^[A-Za-z0-9]{8}$/);
+  }
+});
+
+test("invalid aliases return localized field errors without a database insert", async () => {
+  for (const alias of [null, 123, "ab", "a".repeat(33), "hello world", "a/b", "abc?x"]) {
+    const response = await POST(createRequest(JSON.stringify({ url: "https://example.com/", alias }), { "Accept-Language": "en" }));
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), { error: "Use 3–32 letters, digits, hyphens (-) or underscores (_) for the alias.", field: "alias" });
+  }
+  assert.equal(inserts, 0);
+});
+
+test("an occupied alias returns 409 once and never overwrites or substitutes a code", async () => {
+  await createLink("https://example.com/original", "my-link");
+  inserts = 0;
+  const response = await POST(createRequest(JSON.stringify({ url: "https://example.com/replacement", alias: "my-link" })));
+  assert.equal(response.status, 409);
+  assert.deepEqual(await response.json(), { error: "Alias ini sudah dipakai. Pilih alias lain atau kosongkan untuk kode otomatis.", field: "alias" });
+  assert.equal(inserts, 1);
+  assert.equal(rows.size, 1);
+  assert.equal(await findLink("my-link"), "https://example.com/original");
+});
+
+test("simultaneous requests for the same alias produce one success and one conflict", async () => {
+  const responses = await Promise.all(["first", "second"].map((path) => POST(createRequest(JSON.stringify({ url: `https://example.com/${path}`, alias: "shared-alias" })))));
+  assert.deepEqual(responses.map((response) => response.status).sort(), [201, 409]);
+  assert.equal(rows.size, 1);
+  const winner = responses.findIndex((response) => response.status === 201);
+  assert.equal(await findLink("shared-alias"), `https://example.com/${winner === 0 ? "first" : "second"}`);
 });
 
 test("rejects malformed payloads and unsafe protocols without inserting", async () => {

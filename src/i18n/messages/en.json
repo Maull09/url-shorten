@@ -27,7 +27,10 @@
     "deleteConfirm": "Delete link {code}? This short link will stop working.", "deleted": "Link deleted.",
     "previous": "Previous", "next": "Next", "page": "Page {page} of {pages}", "unavailable": "The dashboard cannot be loaded right now. Please try again later.", "retry": "Try again"
   },
+  "alias": { "label": "Custom alias (optional)", "placeholder": "learn-next", "help": "Leave empty for an automatic code. Use 3–32 letters, digits, - or _. Uppercase and lowercase are different." },
   "errors": {
+    "aliasInvalid": "Use 3–32 letters, digits, hyphens (-) or underscores (_) for the alias.",
+    "aliasTaken": "This alias is already taken. Choose another alias or leave it empty for an automatic code.",
     "required": "Enter the URL you want to shorten.",
     "tooLong": "URLs must be at most 2,048 characters long.",
     "protocol": "Use a complete URL starting with https:// or http://.",

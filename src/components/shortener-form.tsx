@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages";
 import { InputError } from "@/lib/errors";
-import { MAX_URL_LENGTH, validateTargetUrl } from "@/lib/url";
+import { MAX_ALIAS_LENGTH, MAX_URL_LENGTH, validateCustomAlias, validateTargetUrl } from "@/lib/url";
 import type { CreatedLink } from "@/lib/links";
 import { CopyButton } from "./copy-button";
 import { LinkIcon } from "./link-icon";
@@ -12,6 +12,8 @@ import { LinkResult, type ShortLink } from "./link-result";
 
 export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCreated }: { locale: Locale; messages: Messages; endpoint?: "/api/links" | "/api/dashboard/links"; onCreated?: () => void }) {
   const [url, setUrl] = useState("");
+  const [alias, setAlias] = useState("");
+  const [aliasError, setAliasError] = useState("");
   const [fieldError, setFieldError] = useState("");
   const [serviceError, setServiceError] = useState("");
   const [pending, setPending] = useState(false);
@@ -19,12 +21,20 @@ export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCre
   const [links, setLinks] = useState<ShortLink[]>([]);
   const submitting = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const aliasRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (pending) return;
+    if (fieldError) inputRef.current?.focus();
+    else if (aliasError) aliasRef.current?.focus();
+  }, [fieldError, aliasError, pending]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current) return;
 
     setFieldError("");
+    setAliasError("");
     setServiceError("");
     setSaved(false);
 
@@ -38,6 +48,15 @@ export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCre
       return;
     }
 
+    let customAlias: string | undefined;
+    try {
+      customAlias = validateCustomAlias(alias);
+    } catch {
+      setAliasError(messages.errors.aliasInvalid);
+      aliasRef.current?.focus();
+      return;
+    }
+
     submitting.current = true;
     setPending(true);
 
@@ -45,13 +64,14 @@ export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCre
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
-        body: JSON.stringify({ url: targetUrl }),
+        body: JSON.stringify({ url: targetUrl, alias: customAlias }),
       });
-      const data: CreatedLink & { error?: string } = await response.json();
+      const data: CreatedLink & { error?: string; field?: string } = await response.json();
 
       if (!response.ok) {
         const message = data.error ?? messages.errors.unavailable;
-        if (response.status === 400) setFieldError(message);
+        if (data.field === "alias") setAliasError(message);
+        else if (response.status === 400) setFieldError(message);
         else setServiceError(message);
         return;
       }
@@ -62,6 +82,7 @@ export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCre
       } else {
         setSaved(true);
       }
+      setAlias("");
       onCreated?.();
     } catch {
       setServiceError(messages.errors.connection);
@@ -88,6 +109,17 @@ export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCre
             className="min-h-13 w-full min-w-0 rounded-lg border border-control bg-canvas px-4 text-base text-ink placeholder:text-slate-500 focus:border-accent disabled:opacity-70" />
           <p id="url-help" className="mt-2 text-sm text-muted">{messages.form.help}</p>
           {fieldError && <p id="url-error" role="alert" className="mt-3 text-sm text-red-800">{fieldError}</p>}
+          <label htmlFor="alias" className="mb-2 mt-6 block text-sm font-semibold">{messages.alias.label}</label>
+          <div className="flex min-h-13 min-w-0 rounded-lg border border-control bg-canvas focus-within:border-accent">
+            <span aria-hidden="true" className="flex shrink-0 items-center border-r border-line px-3 font-mono text-sm text-muted">/s/</span>
+            <input ref={aliasRef} id="alias" name="alias" type="text" maxLength={MAX_ALIAS_LENGTH} value={alias} disabled={pending}
+              onChange={(event) => { setAlias(event.target.value); setAliasError(""); setServiceError(""); }}
+              placeholder={messages.alias.placeholder} autoComplete="off" autoCapitalize="none" spellCheck={false}
+              aria-invalid={Boolean(aliasError)} aria-describedby={aliasError ? "alias-help alias-error" : "alias-help"}
+              className="w-full min-w-0 rounded-r-lg bg-transparent px-3 font-mono text-base text-ink placeholder:text-slate-500 disabled:opacity-70" />
+          </div>
+          <p id="alias-help" className="mt-2 text-sm text-muted">{messages.alias.help}</p>
+          {aliasError && <p id="alias-error" role="alert" className="mt-3 text-sm text-red-800">{aliasError}</p>}
           <button disabled={pending} type="submit" className="mt-6 flex min-h-13 w-full items-center justify-center gap-3 rounded-lg bg-accent px-5 font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-wait disabled:opacity-70">
             {pending ? messages.form.pending : messages.form.submit}
             {!pending && <span aria-hidden="true">↗</span>}

@@ -174,6 +174,38 @@ test("owned creation retries collisions and rejects unsafe destinations", async 
   assert.equal((await create(request("/api/dashboard/links", "POST", { url: "javascript:alert(1)" }, { Cookie: sessionCookie() }))).status, 400);
 });
 
+test("owned custom aliases retain verified ownership and support listing and deletion", async () => {
+  const response = await create(request("/api/dashboard/links", "POST", { url: "https://example.com/custom", alias: "my-course_2026", owner_id: USER_B }, { Cookie: sessionCookie(USER_A) }));
+  assert.equal(response.status, 201);
+  assert.equal((await response.json()).code, "my-course_2026");
+  assert.equal(fixture.rows.get("my-course_2026")?.owner_id, USER_A);
+  const owned = await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }));
+  assert.equal((await owned.json()).links[0].code, "my-course_2026");
+  const deleted = await remove(request("/api/dashboard/links/my-course_2026", "DELETE", undefined, { Cookie: sessionCookie() }), { params: Promise.resolve({ code: "my-course_2026" }) });
+  assert.equal(deleted.status, 200);
+  assert.equal(fixture.rows.size, 0);
+});
+
+test("dashboard alias validation rejects malformed input before a database insert", async () => {
+  const response = await create(request("/api/dashboard/links", "POST", { url: "https://example.com", alias: "has spaces" }, { Cookie: sessionCookie() }));
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).field, "alias");
+  assert.ok(!fixture.calls.some((call) => call.path === "/rest/v1/links"));
+});
+
+test("aliases conflict globally with other owners and anonymous links without revealing destinations", async () => {
+  for (const owner of [USER_B, null]) {
+    fixture.rows.set("taken-alias", { code: "taken-alias", target_url: "https://example.com/private-original", created_at: "2026-10-13T00:00:00Z", owner_id: owner });
+    fixture.calls.length = 0;
+    const response = await create(request("/api/dashboard/links", "POST", { url: "https://example.com/replacement", alias: "taken-alias" }, { Cookie: sessionCookie() }));
+    assert.equal(response.status, 409);
+    assert.deepEqual(await response.json(), { error: "This alias is already taken. Choose another alias or leave it empty for an automatic code.", field: "alias" });
+    assert.equal(fixture.calls.filter((call) => call.path === "/rest/v1/links").length, 1);
+    assert.equal(fixture.rows.get("taken-alias")?.target_url, "https://example.com/private-original");
+    assert.equal(fixture.rows.get("taken-alias")?.owner_id, owner);
+  }
+});
+
 test("another user's link cannot be deleted and own deletion removes only the target row", async () => {
   fixture.rows.set("Alice001", { code: "Alice001", target_url: "https://example.com/a", created_at: "2026-10-13T00:00:00Z", owner_id: USER_A });
   fixture.rows.set("Bob00001", { code: "Bob00001", target_url: "https://example.com/b", created_at: "2026-10-13T00:00:00Z", owner_id: USER_B });

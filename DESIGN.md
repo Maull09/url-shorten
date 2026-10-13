@@ -31,6 +31,7 @@ Layout: max-width 1120px; spacious header; two-column hero with the task form be
 ## Component rules
 
 - Persistent field labels, HTTP(S) helper text, and inline validation.
+- Beneath the destination, show an optional custom-alias field with a fixed `/s/` prefix in system monospace. Leaving it empty uses an automatic code. Explain the 3–32 character limit, letters/digits/hyphens/underscores, and case sensitivity. Validate inline, focus the relevant field, and preserve both inputs after failure. An occupied alias reports a conflict without substituting a random code. Clear the alias after success so the next creation can use an automatic code.
 - Primary button is `Pendekkan link`; pending label is `Membuat link…`.
 - Result includes the destination, a selectable short URL, `Salin link`, and `Buka link`.
 - Copy feedback uses a polite live region. Errors are announced and preserve entered data.

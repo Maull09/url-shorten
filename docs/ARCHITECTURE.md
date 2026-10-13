@@ -2,13 +2,13 @@
 
 ## Scope
 
-Next.js App Router + TypeScript, Tailwind CSS, Supabase Postgres and Supabase Auth. Scope: anonymous shortening, email/password registration and login, email confirmation, logout, and a private dashboard to create, list, copy, and delete owned links. Custom aliases, analytics, and a global link listing remain outside scope.
+Next.js App Router + TypeScript, Tailwind CSS, Supabase Postgres and Supabase Auth. Scope: anonymous shortening with automatic codes or custom aliases, email/password registration and login, email confirmation, logout, and a private dashboard to create, list, copy, and delete owned links. Analytics and a global link listing remain outside scope.
 
 ## Request flow
 
 1. `src/components/shortener-form.tsx` sends a JSON request to `POST /api/links`.
 2. The route checks origin, content type, payload size, URL validity, and a local rate limit. The browser origin is compared with the public Host header and the protocol supplied by a trusted reverse proxy, rather than Next's internal listening address.
-3. `src/lib/links.ts` generates an eight-character random code and inserts the destination through the server-only Supabase client. A primary key prevents duplicate codes; collisions are retried.
+3. `src/lib/url.ts` validates the optional alias: trim surrounding whitespace, accept 3–32 ASCII letters/digits/hyphens/underscores, preserve case, and treat an absent/blank string as automatic mode. `src/lib/links.ts` inserts the chosen alias or an eight-character random code through the server-only Supabase client. The case-sensitive primary key atomically prevents duplicates across all owners, anonymous links, and generated codes. Only automatic collisions retry (up to three attempts); custom conflicts return HTTP 409 with a localized alias-field error, without overwriting, revealing the destination, or substituting a random code.
 4. The browser builds the short URL from its current origin and the returned code. The API does not trust a caller-provided domain to construct links.
 5. `GET /s/[code]` looks up the destination and returns an uncached `302` redirect. Missing codes return `404`; database failures return `503`.
 
@@ -17,6 +17,8 @@ Next.js App Router + TypeScript, Tailwind CSS, Supabase Postgres and Supabase Au
 `supabase/migrations/202610130001_create_links.sql` creates `public.links`. RLS is enabled without browser-access policies. Browser roles have no table privileges. The server's secret key maps to `service_role`, with explicit SELECT/INSERT privileges. Secrets never use a `NEXT_PUBLIC_` prefix.
 
 The next migration adds nullable `owner_id` referencing `auth.users`. Existing/anonymous links keep a null owner and are never claimed automatically. Authenticated SELECT/INSERT/DELETE policies require `owner_id = auth.uid()`. Dashboard queries use a publishable-key client with the verified user's JWT, never the elevated secret client, and also filter by the verified owner ID. Public redirects still use the secret client to resolve codes without exposing a directory.
+
+`supabase/migrations/202610130003_add_custom_aliases.sql` replaces only the code check constraint with the shared 3–32 character alphabet. It preserves the primary key, ownership policies, and existing eight-character codes. Redirect and deletion routes validate this expanded format. The original schema migrations remain unchanged and must be applied before this migration.
 
 Destinations are public to anyone with their short code. Do not shorten confidential URLs or URLs containing credentials/tokens. The application stores destinations but never fetches their contents.
 

@@ -79,7 +79,7 @@ export function createAuthFixture() {
     const code = url.searchParams.get("code")?.replace(/^eq\./, "");
     if (request.method === "POST") {
       if (body?.owner_id !== tokenId) { send({ code: "42501", message: "RLS rejection" }, 403); return; }
-      if (state.collisions-- > 0) { send({ code: "23505", message: "duplicate code" }, 409); return; }
+      if (state.collisions-- > 0 || rows.has(body.code)) { send({ code: "23505", message: "duplicate code" }, 409); return; }
       const row: FixtureRow = { code: body.code, target_url: body.target_url, owner_id: body.owner_id, created_at: "2026-10-13T00:00:00Z" };
       rows.set(row.code, row);
       send({ code: row.code, target_url: row.target_url, created_at: row.created_at }, 201); return;

@@ -27,7 +27,10 @@
     "deleteConfirm": "Hapus link {code}? Link pendek ini tidak akan bisa dibuka lagi.", "deleted": "Link dihapus.",
     "previous": "Sebelumnya", "next": "Berikutnya", "page": "Halaman {page} dari {pages}", "unavailable": "Dashboard belum bisa dimuat. Coba lagi nanti.", "retry": "Coba lagi"
   },
+  "alias": { "label": "Alias custom (opsional)", "placeholder": "belajar-next", "help": "Kosongkan untuk kode otomatis. Gunakan 3–32 huruf, angka, - atau _. Huruf besar dan kecil dibedakan." },
   "errors": {
+    "aliasInvalid": "Gunakan 3–32 huruf, angka, tanda hubung (-), atau garis bawah (_) untuk alias.",
+    "aliasTaken": "Alias ini sudah dipakai. Pilih alias lain atau kosongkan untuk kode otomatis.",
     "required": "Masukkan URL yang ingin dipendekkan.",
     "tooLong": "URL maksimal 2.048 karakter.",
     "protocol": "Gunakan URL lengkap yang diawali https:// atau http://.",

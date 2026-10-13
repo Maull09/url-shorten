@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { ServiceError } from "./errors";
+import { InputError, ServiceError } from "./errors";
 import { generateShortCode } from "./short-code";
 import { getSupabase } from "./supabase";
 
@@ -11,16 +11,16 @@ export type CreatedLink = {
   createdAt: string;
 };
 
-export async function createLink(targetUrl: string): Promise<CreatedLink> {
-  return insertLink(getSupabase(), targetUrl, null);
+export async function createLink(targetUrl: string, alias?: string): Promise<CreatedLink> {
+  return insertLink(getSupabase(), targetUrl, null, alias);
 }
 
-export async function insertLink(supabase: SupabaseClient, targetUrl: string, ownerId: string | null): Promise<CreatedLink> {
+export async function insertLink(supabase: SupabaseClient, targetUrl: string, ownerId: string | null, alias?: string): Promise<CreatedLink> {
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const { data, error } = await supabase
       .from("links")
-      .insert({ code: generateShortCode(), target_url: targetUrl, owner_id: ownerId })
+      .insert({ code: alias ?? generateShortCode(), target_url: targetUrl, owner_id: ownerId })
       .select("code, target_url, created_at")
       .abortSignal(AbortSignal.timeout(10_000))
       .single();
@@ -30,7 +30,10 @@ export async function insertLink(supabase: SupabaseClient, targetUrl: string, ow
     }
 
     // The primary key protects against collisions, including concurrent inserts.
-    if (error?.code === "23505") continue;
+    if (error?.code === "23505") {
+      if (alias !== undefined) throw new InputError("aliasTaken");
+      continue;
+    }
 
     console.error("Link insert failed", { code: error?.code });
     throw new ServiceError("Could not store link.");

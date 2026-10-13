@@ -3,7 +3,7 @@ import { authFailure, limitMutation, mutationGuard, privateJson, readPrivateJson
 import { AuthRequiredError, InputError } from "@/lib/errors";
 import { insertLink } from "@/lib/links";
 import { listOwnedLinks, parsePage } from "@/lib/owned-links";
-import { validateTargetUrl } from "@/lib/url";
+import { validateCustomAlias, validateTargetUrl } from "@/lib/url";
 import { getAppOrigin } from "@/lib/auth/config";
 
 export async function GET(request: Request) {
@@ -33,7 +33,8 @@ export async function POST(request: Request) {
     const body = await readPrivateJson(request);
     if (!body || typeof body !== "object" || !("url" in body)) throw new InputError("required");
     const targetUrl = validateTargetUrl(body.url, getAppOrigin());
-    const link = await insertLink(auth.client, targetUrl, auth.user.id);
+    const alias = validateCustomAlias("alias" in body ? body.alias : undefined);
+    const link = await insertLink(auth.client, targetUrl, auth.user.id, alias);
     return auth.finish(privateJson(link, 201, locale));
   } catch (error) {
     const response = authFailure(error, locale);
