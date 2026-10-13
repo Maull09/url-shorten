@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { BrandLink } from "@/components/brand-link";
 import { LinkIcon } from "@/components/link-icon";
 import { ShortenerForm } from "@/components/shortener-form";
 import { isLocale } from "@/i18n/config";
@@ -15,12 +16,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
     <div className="mx-auto max-w-6xl px-5 sm:px-8">
       <a href="#konten" className="sr-only z-10 rounded-lg bg-white p-3 focus:not-sr-only focus:absolute focus:top-3">{messages.navigation.skip}</a>
       <header className="flex min-h-24 items-center justify-between gap-4 border-b border-line">
-        <Link href={`/${locale}`} aria-label={messages.navigation.home} className="flex min-h-11 items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-white"><LinkIcon className="h-5 w-5" /></span>
-          <span className="text-2xl font-bold tracking-tight">pendek.</span>
-        </Link>
+        <BrandLink locale={locale} label={messages.navigation.home} />
         <div className="flex items-center gap-6">
-          <a href="#cara-kerja" className="hidden min-h-11 items-center text-sm font-semibold text-muted underline-offset-4 hover:text-accent hover:underline sm:inline-flex">{messages.navigation.how}</a>
+          <Link href={`/${locale}/login`} className="hidden min-h-11 items-center text-sm font-semibold text-accent underline-offset-4 hover:underline sm:inline-flex">{messages.auth.login}</Link>
+          <Link href={`/${locale}/dashboard`} className="hidden min-h-11 items-center text-sm font-semibold text-accent underline-offset-4 hover:underline sm:inline-flex">{messages.auth.dashboard}</Link>
           <LanguageSwitcher locale={locale} label={messages.navigation.language} />
         </div>
       </header>
@@ -42,7 +41,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               </div>
             </div>
           </div>
-          <ShortenerForm locale={locale} messages={messages} />
+          <div className="min-w-0"><ShortenerForm locale={locale} messages={messages} /><p className="mt-5 text-sm leading-relaxed text-muted">{messages.auth.publicNote}{" "}<Link href={`/${locale}/dashboard`} className="inline-flex min-h-11 items-center font-semibold text-accent underline underline-offset-4">{messages.auth.dashboard}</Link></p></div>
         </section>
 
         <section id="cara-kerja" className="scroll-mt-8 border-t border-line py-10 sm:py-12" aria-labelledby="steps-heading">

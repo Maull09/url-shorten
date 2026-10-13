@@ -8,6 +8,25 @@
   "footer": { "tagline": "Lebih ringkas, lebih mudah dibagikan.", "privacy": "Bagikan hanya URL yang boleh diakses publik." },
   "notFound": { "title": "Halaman tidak ditemukan.", "description": "Periksa alamat yang kamu buka atau buat link pendek baru.", "home": "Kembali ke beranda" },
   "redirect": { "notFound": "Link tidak ditemukan. Periksa alamatnya atau minta link baru kepada pengirim.", "unavailable": "Link belum bisa dibuka. Layanan sedang tidak tersedia; coba lagi nanti.", "create": "Buat link" },
+  "auth": {
+    "loginTitle": "Masuk ke Pendek.", "registerTitle": "Buat akun Pendek.",
+    "loginDescription": "Masuk untuk membuat dan mengelola link milikmu.", "registerDescription": "Simpan link dalam dashboard pribadi dengan akun emailmu.",
+    "email": "Email", "password": "Password", "passwordHelp": "Gunakan 8–128 karakter.", "showPassword": "Tampilkan password", "hidePassword": "Sembunyikan password",
+    "login": "Masuk", "register": "Daftar", "loggingIn": "Sedang masuk…", "registering": "Membuat akun…",
+    "noAccount": "Belum punya akun?", "hasAccount": "Sudah punya akun?", "home": "Kembali ke beranda",
+    "checkEmail": "Periksa email untuk menyelesaikan pendaftaran, lalu buka link konfirmasi di browser yang sama. Jika sudah memiliki akun, silakan masuk.",
+    "confirmationFailed": "Link konfirmasi tidak valid atau sudah kedaluwarsa. Coba masuk jika email sudah dikonfirmasi, atau lakukan pendaftaran kembali.",
+    "dashboard": "Dashboard", "publicNote": "Link di halaman ini dibuat tanpa akun. Gunakan dashboard untuk menyimpan dan mengelola link milikmu."
+  },
+  "dashboard": {
+    "createdSuccess": "Link berhasil dibuat.",
+    "creatorHelp": "Link baru akan muncul di daftar link tersimpan.",
+    "title": "Link saya.", "description": "Buat, salin, dan kelola link milikmu di satu tempat.", "account": "Akun", "logout": "Keluar", "loggingOut": "Sedang keluar…",
+    "listTitle": "Link tersimpan", "count": "Total link", "empty": "Belum ada link tersimpan. Buat link pertama melalui form di samping atau di atas.",
+    "created": "Dibuat (WIB)", "delete": "Hapus", "deleteLabel": "Hapus link {code}", "deleting": "Menghapus…",
+    "deleteConfirm": "Hapus link {code}? Link pendek ini tidak akan bisa dibuka lagi.", "deleted": "Link dihapus.",
+    "previous": "Sebelumnya", "next": "Berikutnya", "page": "Halaman {page} dari {pages}", "unavailable": "Dashboard belum bisa dimuat. Coba lagi nanti.", "retry": "Coba lagi"
+  },
   "errors": {
     "required": "Masukkan URL yang ingin dipendekkan.",
     "tooLong": "URL maksimal 2.048 karakter.",
@@ -22,6 +41,19 @@
     "contentType": "Kirim data dengan Content-Type application/json.",
     "rateLimit": "Terlalu banyak percobaan. Coba lagi dalam {seconds} detik.",
     "unavailable": "Link belum bisa dibuat. Layanan sedang tidak tersedia; coba lagi nanti.",
-    "connection": "Koneksi terputus. Periksa koneksi lalu coba lagi."
+    "connection": "Koneksi terputus. Periksa koneksi lalu coba lagi.",
+    "authFields": "Masukkan email dan password yang valid.",
+    "invalidRequest": "Data permintaan belum valid atau terlalu besar. Periksa data lalu coba lagi.",
+    "authEmail": "Masukkan alamat email yang valid.",
+    "authPassword": "Masukkan password; untuk akun baru gunakan 8–128 karakter.",
+    "authInvalid": "Email/password tidak cocok, atau email belum dikonfirmasi.",
+    "authRequired": "Masuk terlebih dahulu untuk mengelola link milikmu.",
+    "authUnavailable": "Layanan akun sedang tidak tersedia. Coba lagi nanti.",
+    "authRegistration": "Akun belum bisa didaftarkan. Periksa email dan password lalu coba lagi.",
+    "authRateLimit": "Terlalu banyak percobaan akun. Coba lagi nanti.",
+    "invalidPage": "Nomor halaman tidak valid.",
+    "linkMissing": "Link tidak ditemukan atau tidak dapat diakses dari akun ini.",
+    "dashboardUnavailable": "Link tersimpan belum bisa dimuat. Coba lagi nanti.",
+    "deleteFailed": "Link belum bisa dihapus. Coba lagi nanti."
   }
 }

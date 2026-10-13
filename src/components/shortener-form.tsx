@@ -10,11 +10,12 @@ import { CopyButton } from "./copy-button";
 import { LinkIcon } from "./link-icon";
 import { LinkResult, type ShortLink } from "./link-result";
 
-export function ShortenerForm({ locale, messages }: { locale: Locale; messages: Messages }) {
+export function ShortenerForm({ locale, messages, endpoint = "/api/links", onCreated }: { locale: Locale; messages: Messages; endpoint?: "/api/links" | "/api/dashboard/links"; onCreated?: () => void }) {
   const [url, setUrl] = useState("");
   const [fieldError, setFieldError] = useState("");
   const [serviceError, setServiceError] = useState("");
   const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [links, setLinks] = useState<ShortLink[]>([]);
   const submitting = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +26,7 @@ export function ShortenerForm({ locale, messages }: { locale: Locale; messages: 
 
     setFieldError("");
     setServiceError("");
+    setSaved(false);
 
     let targetUrl: string;
 
@@ -40,7 +42,7 @@ export function ShortenerForm({ locale, messages }: { locale: Locale; messages: 
     setPending(true);
 
     try {
-      const response = await fetch("/api/links", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept-Language": locale },
         body: JSON.stringify({ url: targetUrl }),
@@ -54,8 +56,13 @@ export function ShortenerForm({ locale, messages }: { locale: Locale; messages: 
         return;
       }
 
-      const link = { ...data, shortUrl: `${window.location.origin}/s/${data.code}` };
-      setLinks((previous) => [link, ...previous].slice(0, 6));
+      if (endpoint === "/api/links") {
+        const link = { ...data, shortUrl: `${window.location.origin}/s/${data.code}` };
+        setLinks((previous) => [link, ...previous].slice(0, 6));
+      } else {
+        setSaved(true);
+      }
+      onCreated?.();
     } catch {
       setServiceError(messages.errors.connection);
     } finally {
@@ -88,7 +95,8 @@ export function ShortenerForm({ locale, messages }: { locale: Locale; messages: 
           {serviceError && <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{serviceError}</p>}
         </form>
         {links[0] && <LinkResult link={links[0]} messages={messages.result} />}
-        {!links.length && <p className="mt-6 text-center text-sm text-muted">{messages.form.empty}</p>}
+        {saved && <p role="status" className="mt-6 text-sm font-semibold text-green-800">{messages.dashboard.createdSuccess}</p>}
+        {!links.length && !saved && <p className="mt-6 text-center text-sm text-muted">{endpoint === "/api/dashboard/links" ? messages.dashboard.creatorHelp : messages.form.empty}</p>}
       </section>
       {links.length > 1 && (
         <section className="mt-7" aria-labelledby="recent-heading">

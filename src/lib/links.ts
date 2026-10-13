@@ -1,4 +1,5 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { ServiceError } from "./errors";
 import { generateShortCode } from "./short-code";
@@ -11,12 +12,15 @@ export type CreatedLink = {
 };
 
 export async function createLink(targetUrl: string): Promise<CreatedLink> {
-  const supabase = getSupabase();
+  return insertLink(getSupabase(), targetUrl, null);
+}
+
+export async function insertLink(supabase: SupabaseClient, targetUrl: string, ownerId: string | null): Promise<CreatedLink> {
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const { data, error } = await supabase
       .from("links")
-      .insert({ code: generateShortCode(), target_url: targetUrl })
+      .insert({ code: generateShortCode(), target_url: targetUrl, owner_id: ownerId })
       .select("code, target_url, created_at")
       .abortSignal(AbortSignal.timeout(10_000))
       .single();

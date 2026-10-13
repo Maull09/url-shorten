@@ -2,7 +2,7 @@
 
 ## Interaction brief
 
-Assumption: the owner is learning full-stack development; visitors want to shorten and share a URL on desktop or mobile. The initial app is a local learning MVP, without accounts, analytics, or a public link directory.
+Assumption: the owner is learning full-stack development; visitors want to shorten and share a URL on desktop or mobile. Registered users also want a private place to manage their own links. Anonymous shortening stays available; links made on the public homepage are not attached to an account. Dashboard-created links belong to the verified user. Analytics and public link listings are outside the current scope.
 
 Primary task: paste a complete HTTP(S) URL, create a short link, then copy or open it. The short link represents a stored destination. Opening it redirects to that destination. Interaction uses a standard labeled form with explicit actions.
 
@@ -39,6 +39,16 @@ Layout: max-width 1120px; spacious header; two-column hero with the task form be
 - Recent links are limited to the current open page and explicitly labeled as such. They are not a public database listing.
 - Indonesian and English pages use `/id` and `/en`; `/` redirects to `/id`. A visible ID/EN selector uses native language names, keyboard-operable links, and an explicit current-language state. The locale controls the document language, metadata, interface, and errors. Navigating to another language starts a new page; current form input and page-session link history are not persisted across navigation.
 - Short links remain `/s/[code]` in both languages. Redirect error text follows the visitor's browser language, defaulting to Indonesian.
+
+## Authentication and dashboard
+
+- Email/password login and registration use a centered form with persistent labels, password-manager autocomplete, a show/hide password control, pending feedback, and localized errors. Registration asks users to confirm their email; do not imply that a session exists before confirmation succeeds.
+- Login and registration each expose the counterpart action and a language selector that stays on the same page type. Passwords and access/refresh tokens never appear in notifications, URLs, or logs. The one-time PKCE authorization code is consumed by the email callback route.
+- The dashboard is protected, with a clear `My links` heading, account email, logout, real owned-link count, creation form, and a paginated list (20 per page). Keep Manrope/Lora and the existing palette. On mobile, controls wrap and the form precedes the list; desktop uses a 380px form beside the wider list.
+- The server-backed list is the dashboard's source of truth. Creation confirms completion and refreshes that list; do not duplicate saved links in a temporary result/history panel that can remain visible after deletion.
+- Each row shows its short link, destination, creation date in Asia/Jakarta, copy, and delete. Avoid charts or fabricated visit counts. Empty and service-error states provide the next action.
+- Deletion requires an explicit native confirmation explaining that the short URL will stop working. Preserve rows after a failed delete and refresh the list only after success.
+- Switching language changes the dashboard route while keeping server-stored owned links. Page-local input still resets on navigation. Logout clears the session and returns to the localized homepage.
 
 ## Guidance provenance
 

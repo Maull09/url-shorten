@@ -2,7 +2,7 @@
 
 ## Scope
 
-Next.js App Router + TypeScript, Tailwind CSS, and Supabase Postgres. Initial scope: anonymous link creation, copying, opening, and redirecting. No authentication, custom aliases, analytics, or global link listing.
+Next.js App Router + TypeScript, Tailwind CSS, Supabase Postgres and Supabase Auth. Scope: anonymous shortening, email/password registration and login, email confirmation, logout, and a private dashboard to create, list, copy, and delete owned links. Custom aliases, analytics, and a global link listing remain outside scope.
 
 ## Request flow
 
@@ -15,6 +15,8 @@ Next.js App Router + TypeScript, Tailwind CSS, and Supabase Postgres. Initial sc
 ## Database boundary
 
 `supabase/migrations/202610130001_create_links.sql` creates `public.links`. RLS is enabled without browser-access policies. Browser roles have no table privileges. The server's secret key maps to `service_role`, with explicit SELECT/INSERT privileges. Secrets never use a `NEXT_PUBLIC_` prefix.
+
+The next migration adds nullable `owner_id` referencing `auth.users`. Existing/anonymous links keep a null owner and are never claimed automatically. Authenticated SELECT/INSERT/DELETE policies require `owner_id = auth.uid()`. Dashboard queries use a publishable-key client with the verified user's JWT, never the elevated secret client, and also filter by the verified owner ID. Public redirects still use the secret client to resolve codes without exposing a directory.
 
 Destinations are public to anyone with their short code. Do not shorten confidential URLs or URLs containing credentials/tokens. The application stores destinations but never fetches their contents.
 
@@ -39,4 +41,16 @@ Supabase setup is documented in `README.md`. Production builds do not require Su
 
 `/` redirects to `/id` through Next.js redirect configuration. Localized pages validate their locale and generate translated metadata. The locale layout sets `<html lang>` and loads the shared local fonts. A global 404 is required because the root layout is under a dynamic locale segment; it uses Next's documented `globalNotFound` option and offers both language homepages. Unknown localized subpaths render a 404 in that locale.
 
-Translations are typed against the Indonesian dictionary, without a new i18n dependency. The form passes its locale in `Accept-Language`; API messages and redirect errors select a supported language from that header. Validation throws stable error codes, translated at the UI/API boundary. Codes and stored destinations are shared across languages. Short URLs and the database schema are unchanged.
+Translations are typed against the Indonesian dictionary, without a new i18n dependency. The form passes its locale in `Accept-Language`; API messages and redirect errors select a supported language from that header. Validation throws stable error codes, translated at the UI/API boundary. Codes and stored destinations are shared across languages. Localization does not change short URLs or destination values.
+
+## Authentication
+
+`@supabase/ssr` manages a PKCE session stored in HttpOnly, SameSite=Lax cookies; cookies are Secure for HTTPS. Auth runs only on the server. `APP_URL` defines the trusted application origin and must use HTTPS except for loopback development. `SUPABASE_PUBLISHABLE_KEY` is used for Auth and owner-scoped database access; the secret key is reserved for anonymous creation and public resolution.
+
+`POST /api/auth/login`, `/register`, and `/logout` validate origin and rate limits; login/registration also bound request size and validate credentials. Registration uses a fixed localized `/{locale}/auth/callback` URL. The callback exchanges a PKCE code, then redirects only to the localized dashboard. It never accepts an arbitrary return URL. Confirmation uses the default Supabase email template and requires the same browser that registered.
+
+`src/proxy.ts` refreshes sessions for dashboard pages and APIs, forwarding refreshed cookies and marking responses private/no-store. Protected pages/API routes independently call `auth.getUser()` to verify the current user with the Auth server; they do not trust an unverified cookie or `getSession()` user object. Server-component clients read cookies, while Route Handlers and Proxy write updates.
+
+`GET/POST /api/dashboard/links` and `DELETE /api/dashboard/links/[code]` require authentication. Creation ignores any caller-supplied owner; deletion applies both code and owner filters and returns 404 for absent/unowned rows. Lists paginate at 20 rows and use real RLS-scoped counts. Cookie-authenticated mutations require a same-origin request matching `APP_URL`. Service errors never include credentials or internal database details.
+
+Public homepage creation stays anonymous, including when an account is signed in. Users create links in the dashboard to save them to their account. Account pages render dynamically, and personalized responses are not shared or cached.

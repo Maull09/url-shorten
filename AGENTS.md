@@ -94,11 +94,12 @@ This section is intentionally project-specific. Replace or remove it when copyin
 
 - This repository is a full-stack learning project for a URL shortener inspired by Bitly.
 - The agreed stack is Next.js App Router, TypeScript, Tailwind CSS, and Supabase Postgres.
-- The initial scope is anonymous URL creation, server-side validation, persistent storage, copying, and redirecting. Authentication, custom aliases, analytics, and public deployment are follow-up scope decisions.
+- Current scope includes anonymous shortening, email/password Supabase Auth, email confirmation, logout, and an owner-only dashboard for creating, listing, copying, and deleting links. Custom aliases, analytics, password recovery, and public deployment require follow-up scope decisions.
 - Support Indonesian (`/id`) and English (`/en`), with `/` redirecting to `/id`. Keep UI, metadata, accessibility labels, and error translations in `src/i18n/messages/` synchronized. Short links remain `/s/[code]` across languages.
 - Use Manrope for UI/body text, Lora for display headings, and system monospace for URLs. Follow `DESIGN.md` and the request flow in `docs/ARCHITECTURE.md`.
 - Keep UI components in `src/components/`, routes in `src/app/`, domain and data access in `src/lib/`, and SQL migrations in `supabase/migrations/`.
-- Access Supabase only from server code. Keep the secret key in `.env.local`, without a `NEXT_PUBLIC_` prefix. Enable RLS and do not expose a public table listing.
+- Access Supabase only from server code. Keep keys in `.env.local`, without a `NEXT_PUBLIC_` prefix. Use the publishable key and a verified user session for dashboard queries; use the secret key only for anonymous creation and public redirects. Enforce owner RLS and never trust an owner ID submitted by a client.
+- Auth uses HttpOnly cookies and server verification. Private responses must not be cached. Validate mutation origins against APP_URL, and keep email callback destinations fixed to local routes.
 - Never substitute mock link storage when Supabase is unavailable. Test fixtures must remain isolated from production code.
 - Keep the implementation easy to trace for a learner. Explain request flow and include focused behavior tests.
 - Preserve semantic structure, keyboard access, visible focus, sufficient contrast, responsive layouts, and reduced-motion preferences.

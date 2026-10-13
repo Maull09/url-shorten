@@ -8,6 +8,25 @@
   "footer": { "tagline": "Shorter links, easier sharing.", "privacy": "Only share URLs that may be accessed publicly." },
   "notFound": { "title": "Page not found.", "description": "Check the address you opened or create a new short link.", "home": "Back to home" },
   "redirect": { "notFound": "Link not found. Check the address or ask the sender for a new link.", "unavailable": "This link cannot be opened right now. The service is unavailable; please try again later.", "create": "Create a link" },
+  "auth": {
+    "loginTitle": "Sign in to Pendek.", "registerTitle": "Create a Pendek account.",
+    "loginDescription": "Sign in to create and manage your own links.", "registerDescription": "Keep your links in a personal dashboard with your email account.",
+    "email": "Email", "password": "Password", "passwordHelp": "Use 8–128 characters.", "showPassword": "Show password", "hidePassword": "Hide password",
+    "login": "Sign in", "register": "Register", "loggingIn": "Signing in…", "registering": "Creating account…",
+    "noAccount": "No account yet?", "hasAccount": "Already have an account?", "home": "Back to home",
+    "checkEmail": "Check your email to finish registering, then open the confirmation link in the same browser. If you already have an account, sign in instead.",
+    "confirmationFailed": "The confirmation link is invalid or expired. Sign in if your email is already confirmed, or try registering again.",
+    "dashboard": "Dashboard", "publicNote": "Links on this page are created without an account. Use the dashboard to save and manage your own links."
+  },
+  "dashboard": {
+    "createdSuccess": "Link created.",
+    "creatorHelp": "New links will appear in the saved links list.",
+    "title": "My links.", "description": "Create, copy, and manage your own links in one place.", "account": "Account", "logout": "Sign out", "loggingOut": "Signing out…",
+    "listTitle": "Saved links", "count": "Total links", "empty": "No saved links yet. Create your first link using the form beside or above this list.",
+    "created": "Created (UTC+7)", "delete": "Delete", "deleteLabel": "Delete link {code}", "deleting": "Deleting…",
+    "deleteConfirm": "Delete link {code}? This short link will stop working.", "deleted": "Link deleted.",
+    "previous": "Previous", "next": "Next", "page": "Page {page} of {pages}", "unavailable": "The dashboard cannot be loaded right now. Please try again later.", "retry": "Try again"
+  },
   "errors": {
     "required": "Enter the URL you want to shorten.",
     "tooLong": "URLs must be at most 2,048 characters long.",
@@ -22,6 +41,19 @@
     "contentType": "Send the request with Content-Type application/json.",
     "rateLimit": "Too many attempts. Try again in {seconds} seconds.",
     "unavailable": "The link could not be created. The service is unavailable; please try again later.",
-    "connection": "The connection was interrupted. Check your connection and try again."
+    "connection": "The connection was interrupted. Check your connection and try again.",
+    "authFields": "Enter a valid email address and password.",
+    "invalidRequest": "The request data is invalid or too large. Check the data and try again.",
+    "authEmail": "Enter a valid email address.",
+    "authPassword": "Enter a password; new accounts require 8–128 characters.",
+    "authInvalid": "The email/password is incorrect, or the email has not been confirmed.",
+    "authRequired": "Sign in first to manage your own links.",
+    "authUnavailable": "The account service is unavailable. Please try again later.",
+    "authRegistration": "The account could not be registered. Check your email and password and try again.",
+    "authRateLimit": "Too many account attempts. Please try again later.",
+    "invalidPage": "The page number is invalid.",
+    "linkMissing": "The link was not found or cannot be accessed by this account.",
+    "dashboardUnavailable": "Saved links cannot be loaded right now. Please try again later.",
+    "deleteFailed": "The link could not be deleted. Please try again later."
   }
 }
