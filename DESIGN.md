@@ -33,7 +33,7 @@ Layout: max-width 1024px; compact header with brand, account navigation, and lan
 - Persistent field labels, HTTP(S) helper text, and inline validation.
 - Beside the destination on desktop and beneath it on mobile, show an optional custom-alias field with a fixed `/s/` prefix in system monospace. Leaving it empty uses an automatic code. Explain the 3–32 character limit, letters/digits/hyphens/underscores, and case sensitivity. Validate inline, focus the relevant field, and preserve both inputs after failure. An occupied alias reports a conflict without substituting a random code. Clear the alias after success so the next creation can use an automatic code.
 - Primary button is `Pendekkan link`; pending label is `Membuat link…`.
-- Each result row includes the destination, a short-link anchor that opens in a new tab, and `Salin link`. Keep copy feedback attached to that row.
+- Each result row includes the destination, a short-link anchor that opens in a new tab, and `Salin link`. Display the complete short URL, including scheme, public host, port when present, and `/s/[code]`, matching the link's href and copied address. Wrap long URLs on small screens instead of truncating them. Keep copy feedback attached to that row.
 - Copy feedback uses a polite live region. Errors are announced and preserve entered data.
 - Visible 3px focus outline, minimum 44px targets, sufficient text contrast, and no horizontal overflow at 320px.
 - Motion only for hover/focus feedback; respect reduced motion.

@@ -28,7 +28,7 @@ export function DashboardLinkList({ links, total, totalVisits, page, origin, loc
           return (
             <li key={link.code} className="grid items-center gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-6">
               <div className="min-w-0">
-                <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center break-all font-mono text-sm font-semibold text-accent underline underline-offset-4">/s/{link.code}<span className="sr-only"> {messages.result.newTab}</span></a>
+                <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full min-h-11 items-center break-all font-mono text-sm font-semibold text-accent underline underline-offset-4">{shortUrl}<span className="sr-only"> {messages.result.newTab}</span></a>
                 <p className="break-all text-sm text-muted">{link.targetUrl}</p>
                 <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs text-muted">
                   <p>{messages.dashboard.created}: <time dateTime={link.createdAt}>{dates.format(new Date(link.createdAt))}</time></p>
