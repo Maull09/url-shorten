@@ -24,7 +24,7 @@
     "createdSuccess": "Link created.",
     "creatorHelp": "New links will appear in the saved links list.",
     "title": "My links.", "description": "Create, copy, and manage your own links in one place.", "account": "Account", "logout": "Sign out", "loggingOut": "Signing out…",
-    "listTitle": "Saved links", "count": "Total links", "empty": "No saved links yet. Create your first link using the form beside or above this list.",
+    "listTitle": "Saved links", "count": "Total links", "empty": "No saved links yet. Create your first link using the form above.",
     "created": "Created (UTC+7)", "delete": "Delete", "deleteLabel": "Delete link {code}", "deleting": "Deleting…",
     "deleteConfirm": "Delete link {code}? This short link will stop working.", "deleted": "Link deleted.",
     "previous": "Previous", "next": "Next", "page": "Page {page} of {pages}", "unavailable": "The dashboard cannot be loaded right now. Please try again later.", "retry": "Try again"

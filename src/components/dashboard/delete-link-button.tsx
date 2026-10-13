@@ -25,5 +25,5 @@ export function DeleteLinkButton({ code, locale, messages }: { code: string; loc
     } catch { setFailed(true); setFeedback(messages.errors.connection); }
     finally { submitting.current = false; setPending(false); }
   }
-  return <div><button type="button" onClick={remove} disabled={pending} aria-label={messages.dashboard.deleteLabel.replace("{code}", code)} className="min-h-11 rounded-lg px-3 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:opacity-70">{pending ? messages.dashboard.deleting : messages.dashboard.delete}</button>{feedback && <p role={failed ? "alert" : "status"} className={`mt-2 max-w-xs text-sm ${failed ? "text-red-800" : "text-green-800"}`}>{feedback}</p>}</div>;
+  return <div><button type="button" onClick={remove} disabled={pending} aria-label={messages.dashboard.deleteLabel.replace("{code}", code)} className="min-h-11 rounded-lg border border-control bg-white px-3 text-sm font-semibold text-red-800 transition-colors hover:border-red-800 hover:bg-red-50 disabled:opacity-70">{pending ? messages.dashboard.deleting : messages.dashboard.delete}</button>{feedback && <p role={failed ? "alert" : "status"} className={`mt-2 max-w-xs text-sm ${failed ? "text-red-800" : "text-green-800"}`}>{feedback}</p>}</div>;
 }

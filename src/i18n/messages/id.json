@@ -24,7 +24,7 @@
     "createdSuccess": "Link berhasil dibuat.",
     "creatorHelp": "Link baru akan muncul di daftar link tersimpan.",
     "title": "Link saya.", "description": "Buat, salin, dan kelola link milikmu di satu tempat.", "account": "Akun", "logout": "Keluar", "loggingOut": "Sedang keluar…",
-    "listTitle": "Link tersimpan", "count": "Total link", "empty": "Belum ada link tersimpan. Buat link pertama melalui form di samping atau di atas.",
+    "listTitle": "Link tersimpan", "count": "Total link", "empty": "Belum ada link tersimpan. Buat link pertamamu melalui form di atas.",
     "created": "Dibuat (WIB)", "delete": "Hapus", "deleteLabel": "Hapus link {code}", "deleting": "Menghapus…",
     "deleteConfirm": "Hapus link {code}? Link pendek ini tidak akan bisa dibuka lagi.", "deleted": "Link dihapus.",
     "previous": "Sebelumnya", "next": "Berikutnya", "page": "Halaman {page} dari {pages}", "unavailable": "Dashboard belum bisa dimuat. Coba lagi nanti.", "retry": "Coba lagi"
