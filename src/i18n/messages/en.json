@@ -20,6 +20,7 @@
     "dashboard": "Dashboard", "publicNote": "Links on this page are created without an account. Use the dashboard to save and manage your own links."
   },
   "dashboard": {
+    "visits": "Visits", "totalVisits": "Total visits", "visitsHelp": "Repeat opens, bots, and previews count. Totals include saved links on every page. Refresh to update.",
     "createdSuccess": "Link created.",
     "creatorHelp": "New links will appear in the saved links list.",
     "title": "My links.", "description": "Create, copy, and manage your own links in one place.", "account": "Account", "logout": "Sign out", "loggingOut": "Signing out…",

@@ -1,20 +1,25 @@
 import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Messages } from "@/i18n/messages";
-import type { CreatedLink } from "@/lib/links";
-import { PAGE_SIZE } from "@/lib/owned-links";
+import { PAGE_SIZE, type OwnedLink } from "@/lib/owned-links";
 import { CopyButton } from "../copy-button";
 import { DeleteLinkButton } from "./delete-link-button";
 
-export function DashboardLinkList({ links, total, page, origin, locale, messages }: { links: CreatedLink[]; total: number; page: number; origin: string; locale: Locale; messages: Messages }) {
+export function DashboardLinkList({ links, total, totalVisits, page, origin, locale, messages }: { links: OwnedLink[]; total: number; totalVisits: number; page: number; origin: string; locale: Locale; messages: Messages }) {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const numbers = new Intl.NumberFormat(locale);
   const dates = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Asia/Jakarta" });
   return (
     <section className="min-w-0" aria-labelledby="links-heading">
-      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
-        <h2 id="links-heading" className="text-base font-semibold">{messages.dashboard.listTitle}</h2>
-        <p className="text-sm text-muted">{messages.dashboard.count}: <span className="font-semibold text-ink">{numbers.format(total)}</span></p>
+      <div className="border-b border-line pb-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 id="links-heading" className="text-base font-semibold">{messages.dashboard.listTitle}</h2>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+            <p>{messages.dashboard.count}: <span className="font-semibold text-ink">{numbers.format(total)}</span></p>
+            <p>{messages.dashboard.totalVisits}: <span className="font-semibold text-ink">{numbers.format(totalVisits)}</span></p>
+          </div>
+        </div>
+        <p className="mt-2 text-sm text-muted">{messages.dashboard.visitsHelp}</p>
       </div>
       {!links.length && <p className="py-8 leading-relaxed text-muted">{messages.dashboard.empty}</p>}
       <ul className="divide-y divide-line">
@@ -25,7 +30,10 @@ export function DashboardLinkList({ links, total, page, origin, locale, messages
               <div className="min-w-0">
                 <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center break-all font-mono text-sm font-semibold text-accent underline underline-offset-4">/s/{link.code}<span className="sr-only"> {messages.result.newTab}</span></a>
                 <p className="break-all text-sm text-muted">{link.targetUrl}</p>
-                <p className="mt-1 text-xs text-muted">{messages.dashboard.created}: <time dateTime={link.createdAt}>{dates.format(new Date(link.createdAt))}</time></p>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs text-muted">
+                  <p>{messages.dashboard.created}: <time dateTime={link.createdAt}>{dates.format(new Date(link.createdAt))}</time></p>
+                  <p>{messages.dashboard.visits}: <span className="font-semibold text-ink">{numbers.format(link.visitCount)}</span></p>
+                </div>
               </div>
               <div className="flex flex-wrap items-start gap-2"><CopyButton url={shortUrl} messages={messages.result} /><DeleteLinkButton code={link.code} locale={locale} messages={messages} /></div>
             </li>

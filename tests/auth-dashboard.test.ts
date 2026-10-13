@@ -30,7 +30,7 @@ before(async () => {
 });
 beforeEach(() => {
   fixture.rows.clear(); fixture.calls.length = 0;
-  Object.assign(fixture.state, { unavailable: false, authRateLimited: false, requireConfirmation: true, collisions: 0, deleted: 0, refreshes: 0 });
+  Object.assign(fixture.state, { unavailable: false, authRateLimited: false, requireConfirmation: true, collisions: 0, deleted: 0, refreshes: 0, failVisitTotal: false, visitTotalOverride: undefined });
   process.env.APP_URL = appOrigin;
 });
 after(async () => {
@@ -229,6 +229,60 @@ test("pagination returns a bounded page with the owner's real count", async () =
   const data = await response.json();
   assert.equal(data.links.length, 5); assert.equal(data.total, 25); assert.equal(data.page, 2);
   assert.equal((await list(request("/api/dashboard/links?page=-1", "GET", undefined, { Cookie: sessionCookie() }))).status, 400);
+});
+
+test("visit totals include every owned page and exclude other owners and anonymous links", async () => {
+  for (let i = 0; i < 25; i++) {
+    const code = `Count${String(i).padStart(3, "0")}`;
+    fixture.rows.set(code, { code, target_url: "https://example.com", created_at: "2026-10-13T00:00:00Z", owner_id: USER_A, visit_count: i + 1 });
+  }
+  fixture.rows.set("other-owner", { code: "other-owner", target_url: "https://example.com", created_at: "2026-10-13T00:00:00Z", owner_id: USER_B, visit_count: 1000 });
+  fixture.rows.set("anonymous", { code: "anonymous", target_url: "https://example.com", created_at: "2026-10-13T00:00:00Z", owner_id: null, visit_count: 2000 });
+  const response = await list(request(`/api/dashboard/links?page=2&owner_id=${USER_B}`, "GET", undefined, { Cookie: sessionCookie() }));
+  const data = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(data.links.length, 5);
+  assert.equal(data.totalVisits, 325);
+  assert.deepEqual(data.links.map((row: { visitCount: number }) => row.visitCount), [21, 22, 23, 24, 25]);
+});
+
+test("new links start at zero visits even when the request supplies a fake counter", async () => {
+  const response = await create(request("/api/dashboard/links", "POST", { url: "https://example.com", visit_count: 1000, visitCount: 999 }, { Cookie: sessionCookie() }));
+  const link = await response.json();
+  assert.equal(response.status, 201);
+  assert.equal(fixture.rows.get(link.code)?.visit_count, 0);
+  assert.equal(fixture.calls.find(call => call.path === "/rest/v1/links" && call.method === "POST")?.body?.visit_count, undefined);
+});
+
+test("empty accounts have a real zero total, and deleting a link removes its visits from the total", async () => {
+  const empty = await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }));
+  assert.equal((await empty.json()).totalVisits, 0);
+  fixture.rows.set("visited", { code: "visited", target_url: "https://example.com", created_at: "2026-10-13T00:00:00Z", owner_id: USER_A, visit_count: 7 });
+  const before = await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }));
+  assert.equal((await before.json()).totalVisits, 7);
+  await remove(request("/api/dashboard/links/visited", "DELETE", undefined, { Cookie: sessionCookie() }), { params: Promise.resolve({ code: "visited" }) });
+  const after = await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }));
+  assert.equal((await after.json()).totalVisits, 0);
+});
+
+test("missing or invalid visit totals return a service error instead of fabricated statistics", async () => {
+  fixture.state.failVisitTotal = true;
+  const response = await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }));
+  assert.equal(response.status, 503);
+  assert.ok(!(await response.text()).includes("private fixture detail"));
+  fixture.state.failVisitTotal = false;
+  for (const value of [null, "12", -1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    fixture.state.visitTotalOverride = value;
+    assert.equal((await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }))).status, 503);
+  }
+});
+
+test("invalid per-link counters are rejected even when the aggregate is valid", async () => {
+  fixture.state.visitTotalOverride = 0;
+  for (const value of [-1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    fixture.rows.set("bad-counter", { code: "bad-counter", target_url: "https://example.com", created_at: "2026-10-13T00:00:00Z", owner_id: USER_A, visit_count: value });
+    assert.equal((await list(request("/api/dashboard/links", "GET", undefined, { Cookie: sessionCookie() }))).status, 503);
+  }
 });
 
 test("logout clears cookies and signs out only the current session", async () => {

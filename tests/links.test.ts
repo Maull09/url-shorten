@@ -2,17 +2,20 @@ import assert from "node:assert/strict";
 import { createServer, type IncomingMessage } from "node:http";
 import { after, before, beforeEach, test } from "node:test";
 import { POST } from "../src/app/api/links/route";
-import { GET } from "../src/app/s/[code]/route";
+import { GET, HEAD } from "../src/app/s/[code]/route";
 import { createLink, findLink } from "../src/lib/links";
 import { ServiceError } from "../src/lib/errors";
 import { SHORT_CODE_PATTERN } from "../src/lib/url";
 
-type Row = { code: string; target_url: string; created_at: string };
+type Row = { code: string; target_url: string; created_at: string; visit_count?: number };
 const rows = new Map<string, Row>();
 let collisionCount = 0;
 let failDatabase = false;
 let inserts = 0;
 let lookups = 0;
+let visitCalls = 0;
+let failVisitRecording = false;
+let removeBeforeRecording = false;
 let requestId = 0;
 const previousUrl = process.env.SUPABASE_URL;
 const previousKey = process.env.SUPABASE_SECRET_KEY;
@@ -20,13 +23,14 @@ const previousKey = process.env.SUPABASE_SECRET_KEY;
 async function parseBody(request: IncomingMessage) {
   const chunks: Buffer[] = [];
   for await (const chunk of request) chunks.push(Buffer.from(chunk));
-  return JSON.parse(Buffer.concat(chunks).toString()) as { code: string; target_url: string };
+  return JSON.parse(Buffer.concat(chunks).toString()) as { code: string; target_url: string; link_code?: string; expected_target_url?: string };
 }
 
 // Emulate the Supabase REST boundary only; production always uses Supabase.
 const database = createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   assert.equal(request.headers.apikey, "sb_secret_test_fixture");
+  const url = new URL(request.url!, "http://localhost");
 
   if (failDatabase) {
     response.writeHead(500).end(JSON.stringify({ code: "XX000", message: "private database detail" }));
@@ -34,6 +38,16 @@ const database = createServer(async (request, response) => {
   }
 
   if (request.method === "POST") {
+    if (url.pathname === "/rest/v1/rpc/record_link_visit") {
+      visitCalls++;
+      const body = await parseBody(request);
+      if (failVisitRecording) { response.writeHead(500).end(JSON.stringify({ code: "XX000", message: "private visit detail" })); return; }
+      if (removeBeforeRecording) rows.delete(body.link_code ?? "");
+      const row = rows.get(body.link_code ?? "");
+      const found = Boolean(row && row.target_url === body.expected_target_url);
+      if (row && found) row.visit_count = (row.visit_count ?? 0) + 1;
+      response.end(JSON.stringify(found)); return;
+    }
     inserts++;
     const body = await parseBody(request);
 
@@ -42,14 +56,13 @@ const database = createServer(async (request, response) => {
       return;
     }
 
-    const row = { ...body, created_at: "2026-10-13T00:00:00.000Z" };
+    const row = { ...body, created_at: "2026-10-13T00:00:00.000Z", visit_count: 0 };
     rows.set(row.code, row);
     response.writeHead(201).end(JSON.stringify(row));
     return;
   }
 
   lookups++;
-  const url = new URL(request.url!, "http://localhost");
   const code = url.searchParams.get("code")?.replace(/^eq\./, "");
   const row = rows.get(code ?? "");
   response.end(JSON.stringify(row ? [{ target_url: row.target_url }] : []));
@@ -69,6 +82,9 @@ beforeEach(() => {
   failDatabase = false;
   inserts = 0;
   lookups = 0;
+  visitCalls = 0;
+  failVisitRecording = false;
+  removeBeforeRecording = false;
 });
 
 after(async () => {
@@ -166,6 +182,51 @@ test("creates a link through POST and redirects with an uncached 302", async () 
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "https://example.com/article?q=1#intro");
   assert.equal(redirect.headers.get("cache-control"), "no-store");
+  assert.equal(rows.get(link.code)?.visit_count, 1);
+});
+
+test("each repeated or concurrent GET records a visit before redirecting", async () => {
+  const link = await createLink("https://example.com", "count-visits");
+  const responses = await Promise.all(Array.from({ length: 20 }, () => openLink(link.code)));
+  assert.ok(responses.every(response => response.status === 302));
+  assert.equal(rows.get(link.code)?.visit_count, 20);
+  assert.equal(visitCalls, 20);
+});
+
+test("HEAD returns redirect headers without recording visits or returning a body", async () => {
+  const link = await createLink("https://example.com", "head-check");
+  const response = await HEAD(new Request(`http://localhost:3000/s/${link.code}`, { method: "HEAD" }), { params: Promise.resolve({ code: link.code }) });
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "https://example.com/");
+  assert.equal(await response.text(), "");
+  assert.equal(rows.get(link.code)?.visit_count, 0);
+  assert.equal(visitCalls, 0);
+});
+
+test("missing, malformed, and unsafe destinations never record visits", async () => {
+  assert.equal((await openLink("missing-link")).status, 404);
+  assert.equal((await openLink("invalid!")).status, 404);
+  rows.set("unsafe-link", { code: "unsafe-link", target_url: "javascript:alert(1)", created_at: "" });
+  assert.equal((await openLink("unsafe-link")).status, 503);
+  assert.equal(visitCalls, 0);
+});
+
+test("visit recording failure returns a private-detail-free 503 instead of an uncounted redirect", async () => {
+  const link = await createLink("https://example.com", "failed-count");
+  failVisitRecording = true;
+  const response = await openLink(link.code);
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("location"), null);
+  assert.ok(!(await response.text()).includes("private visit detail"));
+  assert.equal(rows.get(link.code)?.visit_count, 0);
+});
+
+test("a link deleted between lookup and recording no longer redirects", async () => {
+  const link = await createLink("https://example.com", "deleted-link");
+  removeBeforeRecording = true;
+  const response = await openLink(link.code);
+  assert.equal(response.status, 404);
+  assert.equal(response.headers.get("location"), null);
 });
 
 test("creates and redirects a case-sensitive custom alias with hyphens and underscores", async () => {

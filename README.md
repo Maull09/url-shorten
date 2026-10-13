@@ -2,7 +2,7 @@
 
 URL shortener untuk belajar full-stack dengan Next.js App Router, TypeScript, Tailwind CSS, Supabase Postgres, dan Supabase Auth.
 
-Fitur: pemendekan link anonim, kode otomatis atau alias custom, akun email/password dengan konfirmasi email, login/logout, dashboard pribadi, pembuatan dan penghapusan link milik pengguna, pagination, salin link, dan redirect publik. Pemulihan password dan statistik kunjungan belum termasuk.
+Fitur: pemendekan link anonim, kode otomatis atau alias custom, akun email/password dengan konfirmasi email, login/logout, dashboard pribadi, pembuatan dan penghapusan link milik pengguna, pagination, salin link, redirect publik, serta jumlah kunjungan per link dan total akun. Pemulihan password dan analitik pengunjung terperinci belum termasuk.
 
 Antarmuka tersedia dalam bahasa Indonesia (`/id`) dan Inggris (`/en`); `/` menuju `/id`. Gunakan pilihan ID/EN di header untuk berpindah bahasa. Terjemahan mencakup metadata, label aksesibilitas, form, clipboard, validasi, dan pesan API. Link pendek tetap memakai `/s/KODE` untuk kedua bahasa.
 
@@ -18,7 +18,7 @@ Copy-Item .env.example .env.local
 ```
 
 1. Buat atau buka proyek di [Supabase Dashboard](https://supabase.com/dashboard).
-2. Buka SQL Editor dan jalankan migrasi yang belum diterapkan secara berurutan: `supabase/migrations/202610130001_create_links.sql`, `supabase/migrations/202610130002_add_link_ownership.sql`, lalu `supabase/migrations/202610130003_add_custom_aliases.sql`. Jika dua migrasi sebelumnya sudah dijalankan, jalankan **hanya migrasi ketiga**. Migrasi kedua mempertahankan link lama dengan owner null dan menambahkan policy akses per pengguna. Migrasi ketiga memperluas aturan kode untuk alias custom tanpa mengubah link lama.
+2. Buka SQL Editor dan jalankan migrasi yang belum diterapkan secara berurutan: `supabase/migrations/202610130001_create_links.sql`, `supabase/migrations/202610130002_add_link_ownership.sql`, `supabase/migrations/202610130003_add_custom_aliases.sql`, lalu `supabase/migrations/202610130004_add_visit_counts.sql`. Jika tiga migrasi sebelumnya sudah dijalankan, jalankan **hanya migrasi keempat**. Migrasi kedua menambahkan kepemilikan dan policy akun, migrasi ketiga mendukung alias custom, dan migrasi keempat menambahkan counter serta fungsi kunjungan. Link lama tetap ada dan mulai dengan nol kunjungan; kunjungan sebelum migrasi tidak dapat direkonstruksi.
 3. Ambil Project URL, secret key (`sb_secret_...`), dan publishable key (`sb_publishable_...`) dari pengaturan API Keys. Panduan resmi: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys). Jangan mengisi publishable key dengan secret key.
 4. Isi `.env.local` secara lokal:
 
@@ -94,6 +94,10 @@ Tes memakai server HTTP lokal terisolasi untuk menguji batas REST/Auth Supabase,
 Untuk verifikasi integrasi asli: registrasi dan konfirmasi email, masuk, buat link di dashboard, restart aplikasi, lalu buka link yang sama. Coba dua akun: masing-masing hanya boleh melihat dan menghapus link miliknya. Link anonim lama harus tetap bisa dibuka dan tidak muncul di dashboard akun baru. Setelah menghapus link sendiri, `/s/KODE` harus mengembalikan 404. Logout harus membuat dashboard mengarahkan kembali ke login.
 
 ## Batas versi belajar
+
+Dashboard menampilkan kunjungan tiap link dan total seluruh link milik akun yang masih tersimpan, termasuk link pada halaman pagination lain. Angka diperbarui saat halaman dimuat ulang. Membuka link berulang kali, bot, dan preview link ikut dihitung; ini bukan jumlah pengunjung unik. Menghapus link mengeluarkan hitungannya dari total. Beranda anonim hanya menampilkan daftar sesi tanpa counter yang dapat menjadi kedaluwarsa.
+
+Request GET ke link valid menambah counter secara atomik sebelum redirect 302. HEAD, link hilang, dan tujuan yang tidak valid tidak dihitung. Jika pencatatan gagal, redirect mengembalikan 503; jika link dihapus atau tujuannya berubah di antara pembacaan dan pencatatan, respons menjadi 404. Aplikasi tidak menyimpan IP, user-agent, atau log kunjungan individual. Timeout setelah database berhasil menulis dapat menyebabkan hitungan tercatat meskipun pengunjung tidak menerima respons. Hak fungsi dibatasi secara eksplisit mengikuti [panduan fungsi database Supabase](https://supabase.com/docs/guides/database/functions).
 
 Link tujuan dapat diakses siapa pun yang mengetahui kode pendeknya. Hindari URL rahasia atau yang mengandung token. Link yang dibuat di beranda selalu anonim, termasuk saat akun sedang login. Gunakan dashboard untuk menyimpan link ke akun. Link anonim lama tidak dapat diklaim otomatis.
 

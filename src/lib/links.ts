@@ -57,3 +57,15 @@ export async function findLink(code: string): Promise<string | null> {
 
   return data?.target_url ?? null;
 }
+
+export async function recordLinkVisit(code: string, targetUrl: string): Promise<boolean> {
+  const { data, error } = await getSupabase()
+    .rpc("record_link_visit", { link_code: code, expected_target_url: targetUrl })
+    .abortSignal(AbortSignal.timeout(10_000));
+
+  if (error || typeof data !== "boolean") {
+    console.error("Link visit recording failed", { code: error?.code });
+    throw new ServiceError("Could not record link visit.");
+  }
+  return data;
+}

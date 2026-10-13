@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage } from "node:http";
 
 export const USER_A = "11111111-1111-4111-8111-111111111111";
 export const USER_B = "22222222-2222-4222-8222-222222222222";
-export type FixtureRow = { code: string; target_url: string; created_at: string; owner_id: string | null };
+export type FixtureRow = { code: string; target_url: string; created_at: string; owner_id: string | null; visit_count?: number };
 
 export function fixtureUser(id: string) {
   return { id, aud: "authenticated", role: "authenticated", email: id === USER_A ? "alice@example.com" : "bob@example.com", email_confirmed_at: "2026-01-01T00:00:00Z", app_metadata: { provider: "email" }, user_metadata: {}, identities: [], created_at: "2026-01-01T00:00:00Z" };
@@ -28,7 +28,7 @@ async function bodyOf(request: IncomingMessage) {
 export function createAuthFixture() {
   const rows = new Map<string, FixtureRow>();
   const calls: { path: string; method: string; authorization?: string; body?: Record<string, string> }[] = [];
-  const state = { unavailable: false, authRateLimited: false, requireConfirmation: true, collisions: 0, deleted: 0, refreshes: 0, logoutScope: "" };
+  const state = { unavailable: false, authRateLimited: false, requireConfirmation: true, collisions: 0, deleted: 0, refreshes: 0, logoutScope: "", failVisitTotal: false, visitTotalOverride: undefined as unknown };
   const server = createServer(async (request, response) => {
     response.setHeader("Content-Type", "application/json");
     const url = new URL(request.url!, "http://localhost");
@@ -67,6 +67,19 @@ export function createAuthFixture() {
       return;
     }
     if (url.pathname === "/auth/v1/logout") { state.logoutScope = url.searchParams.get("scope") ?? ""; response.writeHead(204).end(); return; }
+    if (url.pathname === "/rest/v1/rpc/record_link_visit") {
+      if (request.headers.apikey !== "sb_secret_test_fixture") { send({ code: "42501", message: "Server only" }, 403); return; }
+      const row = rows.get(body?.link_code ?? "");
+      if (!row || row.target_url !== body?.expected_target_url) { send(false); return; }
+      row.visit_count = (row.visit_count ?? 0) + 1;
+      send(true); return;
+    }
+    if (url.pathname === "/rest/v1/rpc/get_owned_visit_total") {
+      if (request.headers.apikey !== "sb_publishable_fixture" || !tokenId) { send({ code: "42501", message: "Auth required" }, 403); return; }
+      if (state.failVisitTotal) { send({ code: "XX000", message: "private fixture detail" }, 500); return; }
+      const total = [...rows.values()].filter(row => row.owner_id === tokenId).reduce((sum, row) => sum + (row.visit_count ?? 0), 0);
+      send(state.visitTotalOverride === undefined ? total : state.visitTotalOverride); return;
+    }
     if (url.pathname !== "/rest/v1/links") { send({ message: "Unknown fixture route" }, 404); return; }
     if (request.method === "GET" && request.headers.apikey === "sb_secret_test_fixture") {
       const publicCode = url.searchParams.get("code")?.replace(/^eq\./, "");
@@ -80,7 +93,7 @@ export function createAuthFixture() {
     if (request.method === "POST") {
       if (body?.owner_id !== tokenId) { send({ code: "42501", message: "RLS rejection" }, 403); return; }
       if (state.collisions-- > 0 || rows.has(body.code)) { send({ code: "23505", message: "duplicate code" }, 409); return; }
-      const row: FixtureRow = { code: body.code, target_url: body.target_url, owner_id: body.owner_id, created_at: "2026-10-13T00:00:00Z" };
+      const row: FixtureRow = { code: body.code, target_url: body.target_url, owner_id: body.owner_id, created_at: "2026-10-13T00:00:00Z", visit_count: 0 };
       rows.set(row.code, row);
       send({ code: row.code, target_url: row.target_url, created_at: row.created_at }, 201); return;
     }
@@ -92,7 +105,7 @@ export function createAuthFixture() {
     const offset = Number(url.searchParams.get("offset") ?? 0);
     const limit = Number(url.searchParams.get("limit") ?? 20);
     response.setHeader("Content-Range", `${offset}-${Math.max(offset, offset + Math.min(limit, owned.length) - 1)}/${owned.length}`);
-    send(owned.slice(offset, offset + limit).map(({ code, target_url, created_at }) => ({ code, target_url, created_at })));
+    send(owned.slice(offset, offset + limit).map(({ code, target_url, created_at, visit_count }) => ({ code, target_url, created_at, visit_count: visit_count ?? 0 })));
   });
   return { server, rows, calls, state };
 }

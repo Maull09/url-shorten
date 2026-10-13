@@ -2,7 +2,7 @@
 
 ## Interaction brief
 
-Assumption: the owner is learning full-stack development; visitors want to shorten and share a URL on desktop or mobile. Registered users also want a private place to manage their own links. Anonymous shortening stays available; links made on the public homepage are not attached to an account. Dashboard-created links belong to the verified user. Analytics and public link listings are outside the current scope.
+Assumption: the owner is learning full-stack development; visitors want to shorten and share a URL on desktop or mobile. Registered users also want a private place to manage their own links and see how often they are opened. Anonymous shortening stays available; links made on the public homepage are not attached to an account. Dashboard-created links belong to the verified user. Only aggregate visit counters are included; detailed analytics and public link listings are outside scope.
 
 Primary task: paste a complete HTTP(S) URL, create a short link, then copy or open it. The short link represents a stored destination. Opening it redirects to that destination. Interaction uses a standard labeled form with explicit actions.
 
@@ -47,7 +47,8 @@ Layout: max-width 1024px; compact header with brand, account navigation, and lan
 - Login and registration each expose the counterpart action and a language selector that stays on the same page type. Passwords and access/refresh tokens never appear in notifications, URLs, or logs. The one-time PKCE authorization code is consumed by the email callback route.
 - The dashboard is protected, with a clear `My links` heading, account email, logout, real owned-link count, creation form, and a paginated list (20 per page). Keep Manrope/Lora and the existing palette. Use the same one-column form-then-list structure as the public workspace. Account information and logout wrap at small widths.
 - The server-backed list is the dashboard's source of truth. Creation confirms completion and refreshes that list; do not duplicate saved links in a temporary result/history panel that can remain visible after deletion.
-- Each row shows its short link, destination, creation date in Asia/Jakarta, copy, and delete. Avoid charts or fabricated visit counts. Empty and service-error states provide the next action.
+- Each saved row shows its short link, destination, creation date in Asia/Jakarta, visit count, copy, and delete. The list header shows total links and total visits across all of the account's currently saved links, including links on other pages. Keep counters as simple labeled text, without charts or extra metric panels. Empty and service-error states provide the next action.
+- Visit counts represent recorded GET redirects, including repeat opens, bots, and link previews; they are not unique visitors. Show this explanation under the list heading. HEAD checks, missing codes, and invalid destinations do not count. Counts update when the dashboard is loaded or refreshed; do not imply live updates. Public page-session results do not show stale visit numbers.
 - Deletion requires an explicit native confirmation explaining that the short URL will stop working. Preserve rows after a failed delete and refresh the list only after success.
 - Switching language changes the dashboard route while keeping server-stored owned links. Page-local input still resets on navigation. Logout clears the session and returns to the localized homepage.
 

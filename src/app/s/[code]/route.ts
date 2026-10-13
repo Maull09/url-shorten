@@ -1,6 +1,6 @@
 import { getPreferredLocale, type Locale } from "@/i18n/config";
 import { getMessages } from "@/i18n/messages";
-import { findLink } from "@/lib/links";
+import { findLink, recordLinkVisit } from "@/lib/links";
 import { getRequestOrigin } from "@/lib/request-origin";
 import { SHORT_CODE_PATTERN, validateTargetUrl } from "@/lib/url";
 
@@ -37,6 +37,10 @@ export async function GET(request: Request, context: { params: Promise<{ code: s
     // Revalidate stored data so an invalid database row cannot become a redirect.
     const targetUrl = validateTargetUrl(destination, getRequestOrigin(request));
 
+    if (request.method === "GET" && !await recordLinkVisit(code, destination)) {
+      return errorResponse(404, locale);
+    }
+
     return new Response(null, {
       status: 302,
       headers: { Location: targetUrl, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" },
@@ -44,4 +48,9 @@ export async function GET(request: Request, context: { params: Promise<{ code: s
   } catch {
     return errorResponse(503, locale);
   }
+}
+
+export async function HEAD(request: Request, context: { params: Promise<{ code: string }> }) {
+  const response = await GET(request, context);
+  return new Response(null, { status: response.status, headers: response.headers });
 }
